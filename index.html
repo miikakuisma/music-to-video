@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="drop-zone" id="dropZone">
+            Drop audio file here (MP3 or WAV)
+        </div>
+        
+        <div class="controls">
+            <div class="color-controls">
+                <label>Background Color:
+                    <input type="color" id="bgColor" value="#ffffff">
+                </label>
+                <label>Waveform Color:
+                    <input type="color" id="waveformColor" value="#1e88e5">
+                </label>
+                <label>Progress Color:
+                    <input type="color" id="progressColor" value="#4caf50">
+                </label>
+            </div>
+            
+            <button id="renderBtn" disabled>Render Video</button>
+        </div>
+
+        <div class="waveform-container">
+            <div id="waveform"></div>
+            <div class="song-info">
+                <span id="songTitle">No file selected</span>
+                <span id="duration">00:00</span>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html> 

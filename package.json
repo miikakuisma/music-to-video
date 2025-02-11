@@ -1,0 +1,15 @@
+{
+  "name": "audio-visualizer",
+  "version": "1.0.0",
+  "description": "Audio visualization and video generator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "electron": "^28.0.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "wavesurfer.js": "^7.7.3"
+  }
+} 
