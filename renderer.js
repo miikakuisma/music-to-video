@@ -2,6 +2,8 @@ let wavesurfer;
 let audioFile;
 let textCanvas;
 let textCtx;
+let waveformCanvas;
+let progressCanvas;
 
 // Initialize WaveSurfer
 function initWaveSurfer() {
@@ -14,9 +16,16 @@ function initWaveSurfer() {
         barHeight: 1,
         barWidth: 2,
         barGap: 2,
+        barAlign: 'bottom',
         responsive: false,
         normalize: false,
         partialRender: false, // Ensure full waveform is rendered
+    });
+
+    wavesurfer.on('ready', () => {
+        // Get canvas elements once after wavesurfer is ready
+        waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
+        progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
     });
 
     // Add error handling for WaveSurfer initialization
@@ -140,49 +149,39 @@ function updateColors() {
 }
 
 function exportWaveformWithProgress() {
-  return new Promise((resolve, reject) => {
-    // Get the canvas element used by WaveSurfer
-    const canvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
+    return new Promise((resolve, reject) => {
+        // Use stored canvas references instead of querying DOM each time
+        const clonedCanvas = document.createElement('canvas');
+        clonedCanvas.width = waveformCanvas.width;
+        clonedCanvas.height = waveformCanvas.height;
+        const ctx = clonedCanvas.getContext('2d');
 
-    // Create a new canvas with the same dimensions
-    const clonedCanvas = document.createElement('canvas');
-    clonedCanvas.width = canvas.width;
-    clonedCanvas.height = canvas.height;
-    const ctx = clonedCanvas.getContext('2d');
+        // Fill background
+        const bgColor = document.getElementById('bgColor').value;
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
 
-    // Fill background with selected color
-    const bgColor = document.getElementById('bgColor').value;
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
+        // Draw the original waveform
+        ctx.drawImage(waveformCanvas, 0, 0);
 
-    // Draw the original waveform onto the new canvas
-    ctx.drawImage(canvas, 0, 0);
+        // Calculate progress
+        const progress = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
+        const playheadX = progress * waveformCanvas.width;
 
-    // Calculate the current playback position
-    const progress = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
-    const playheadX = progress * canvas.width;
+        // Draw progress
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, playheadX, waveformCanvas.height);
+        ctx.clip();
+        ctx.drawImage(progressCanvas, 0, 0);
+        ctx.restore();
 
-    // Get progress image
-    const progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
-    const progressImage = new Image();
-    progressImage.src = progressCanvas.toDataURL('image/png');
-
-    // Draw progress with clipped image put on top of waveform
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, playheadX, canvas.height);
-    ctx.clip();
-    // Draw progress image only in clipped area
-    ctx.drawImage(progressImage, 0, 0);
-    ctx.restore();
-
-    // Draw text canvas on top of waveform
-    ctx.drawImage(textCanvas, 0, 0);
-    
-    // Export the final image with the playhead
-    const imageURL = clonedCanvas.toDataURL('image/png');
-    resolve(imageURL);
-  });
+        // Draw text overlay
+        ctx.drawImage(textCanvas, 0, 0);
+        
+        const imageURL = clonedCanvas.toDataURL('image/png');
+        resolve(imageURL);
+    });
 }
 
 function initTextCanvas() {
@@ -228,21 +227,23 @@ async function generateVideo() {
     const frames = [];
     const duration = wavesurfer.getDuration();
     const fps = 2;
-    const frameCount = Math.ceil(duration * fps);
+    const frameCount = Math.ceil(duration);
 
     // Generate frames
     for (let i = 0; i < frameCount; i++) {
         // Calculate progress percentage
         const progress = i / frameCount;
         
-        // Set the playback position
-        wavesurfer.seekTo(progress);
+        // Set the playback position and wait for seek to complete
+        await new Promise(resolve => {
+            wavesurfer.seekTo(progress);
+            wavesurfer.on('timeupdate', resolve);
+        });
         
-        // Wait for the render to complete
-        await new Promise(resolve => setTimeout(resolve, 10));
+        // Add a small delay to ensure rendering is stable
+        await new Promise(resolve => setTimeout(resolve, 20));
         
         try {
-            // Use WaveSurfer's exportImage method
             const imageData = await exportWaveformWithProgress();
             frames.push(imageData);
         } catch (err) {
