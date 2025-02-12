@@ -1,7 +1,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
+
+// Set the ffmpeg path
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 function createWindow() {
   const mainWindow = new BrowserWindow({

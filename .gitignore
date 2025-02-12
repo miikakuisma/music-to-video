@@ -1,3 +1,5 @@
 node_modules/
 output.mp4
+.DS_Store
+ffmpeg-static/
 
