@@ -1,5 +1,7 @@
 let wavesurfer;
 let audioFile;
+let textCanvas;
+let textCtx;
 
 // Initialize WaveSurfer
 function initWaveSurfer() {
@@ -27,7 +29,9 @@ function initWaveSurfer() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     initWaveSurfer();
+    initTextCanvas();
     setupEventListeners();
+    updateColors();
 });
 
 function setupEventListeners() {
@@ -35,9 +39,9 @@ function setupEventListeners() {
     const renderBtn = document.getElementById('renderBtn');
     
     // Color control events
-    document.getElementById('bgColor').addEventListener('change', updateColors);
-    document.getElementById('waveformColor').addEventListener('change', updateColors);
-    document.getElementById('progressColor').addEventListener('change', updateColors);
+    document.getElementById('bgColor').addEventListener('input', updateColors);
+    document.getElementById('waveformColor').addEventListener('input', updateColors);
+    document.getElementById('progressColor').addEventListener('input', updateColors);
 
     // Drop zone events
     dropZone.addEventListener('dragover', (e) => {
@@ -52,22 +56,73 @@ function setupEventListeners() {
     dropZone.addEventListener('drop', handleFileDrop);
     
     renderBtn.addEventListener('click', generateVideo);
+
+    // Add text control event listeners
+    document.getElementById('songTitleInput').addEventListener('input', renderText);
+    document.getElementById('artistNameInput').addEventListener('input', renderText);
+    document.getElementById('fontSelect').addEventListener('change', renderText);
+    document.getElementById('textColor').addEventListener('input', renderText);
+    document.getElementById('fontSize').addEventListener('input', renderText);
 }
 
-function handleFileDrop(e) {
+async function handleFileDrop(e) {
     e.preventDefault();
     const dropZone = document.getElementById('dropZone');
     dropZone.classList.remove('drag-over');
 
     const file = e.dataTransfer.files[0];
-    if (file && (file.type === 'audio/mp3' || file.type === 'audio/wav')) {
+    console.log(file);
+    if (file && (file.type === 'audio/mpeg' || file.type === 'audio/wav')) {
         audioFile = file;
         document.getElementById('songTitle').textContent = file.name;
         document.getElementById('renderBtn').disabled = false;
+
+        if (file.type === 'audio/mpeg') {
+            try {
+                // Use CommonJS require
+                const { parseBuffer } = require('music-metadata');
+                
+                // Convert File to Buffer
+                const buffer = await file.arrayBuffer();
+                const metadata = await parseBuffer(
+                    Buffer.from(buffer),
+                    { mimeType: file.type }
+                );
+                
+                console.log('Metadata:', metadata);
+                
+                // Update the input fields with the metadata
+                if (metadata.common.title) {
+                    document.getElementById('songTitleInput').value = metadata.common.title;
+                }
+                if (metadata.common.artist) {
+                    document.getElementById('artistNameInput').value = metadata.common.artist;
+                }
+            } catch (error) {
+                console.error('Error reading metadata:', error);
+                // Fallback to filename if metadata reading fails
+                const filename = file.name.replace(/\.[^/.]+$/, '');
+                document.getElementById('songTitleInput').value = filename;
+                document.getElementById('artistNameInput').value = '';
+            }
+        } else {
+            // Parse WAV filename (Artist - Song)
+            const filename = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+            const parts = filename.split('-').map(part => part.trim());
+            if (parts.length === 2) {
+                document.getElementById('artistNameInput').value = parts[0];
+                document.getElementById('songTitleInput').value = parts[1];
+            } else {
+                document.getElementById('songTitleInput').value = filename;
+                document.getElementById('artistNameInput').value = '';
+            }
+        }
+
         wavesurfer.loadBlob(file);
         wavesurfer.on('ready', () => {
             const duration = wavesurfer.getDuration();
             document.getElementById('duration').textContent = formatTime(duration);
+            renderText();
         });
     }
 }
@@ -121,10 +176,48 @@ function exportWaveformWithProgress() {
     ctx.drawImage(progressImage, 0, 0);
     ctx.restore();
 
+    // Draw text canvas on top of waveform
+    ctx.drawImage(textCanvas, 0, 0);
+    
     // Export the final image with the playhead
     const imageURL = clonedCanvas.toDataURL('image/png');
     resolve(imageURL);
   });
+}
+
+function initTextCanvas() {
+    textCanvas = document.getElementById('textOverlay');
+    textCtx = textCanvas.getContext('2d');
+    
+    // Set canvas size to match waveform
+    textCanvas.width = 1280;
+    textCanvas.height = 720;
+    
+    // Initial render
+    renderText();
+}
+
+function renderText() {
+    // Clear the canvas
+    textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+    
+    // Get text properties
+    const songTitle = document.getElementById('songTitleInput').value;
+    const artistName = document.getElementById('artistNameInput').value;
+    const font = document.getElementById('fontSelect').value;
+    const color = document.getElementById('textColor').value;
+    const size = document.getElementById('fontSize').value;
+    
+    textCtx.fillStyle = color;
+    textCtx.textAlign = 'center';
+    
+    // Render song title
+    textCtx.font = `bold ${size}px ${font}`;
+    textCtx.fillText(songTitle, textCanvas.width / 2, 50);
+    
+    // Render artist name
+    textCtx.font = `${size * 0.8}px ${font}`;
+    textCtx.fillText(artistName, textCanvas.width / 2, 50 + size * 1.2);
 }
 
 async function generateVideo() {

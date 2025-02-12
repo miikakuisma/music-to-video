@@ -13,7 +13,7 @@
         <div class="controls">
             <div class="color-controls">
                 <label>Background Color:
-                    <input type="color" id="bgColor" value="#ffffff">
+                    <input type="color" id="bgColor" value="#333333">
                 </label>
                 <label>Waveform Color:
                     <input type="color" id="waveformColor" value="#1e88e5">
@@ -25,12 +25,27 @@
             
             <button id="renderBtn" disabled>Render Video</button>
         </div>
-
+        <div class="song-info">
+            <span id="songTitle">No file selected</span>
+            <span id="duration">00:00</span>
+        </div>
+        <div class="text-controls">
+            <div class="text-input-group">
+                <input type="text" id="songTitleInput" placeholder="Song Title">
+                <input type="text" id="artistNameInput" placeholder="Artist Name">
+                <select id="fontSelect">
+                    <option value="Arial">Arial</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                </select>
+                <input type="color" id="textColor" value="#ffffff">
+                <input type="number" id="fontSize" value="24" min="12" max="72">
+            </div>
+        </div>
         <div class="waveform-container">
-            <div id="waveform"></div>
-            <div class="song-info">
-                <span id="songTitle">No file selected</span>
-                <span id="duration">00:00</span>
+            <div class="canvas-stack">
+                <canvas id="textOverlay"></canvas>
+                <div id="waveform"></div>
             </div>
         </div>
     </div>
