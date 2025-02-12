@@ -11,8 +11,8 @@ function initWaveSurfer() {
         height: 720,
         barHeight: 1,
         barWidth: 2,
-        barGap: 1,
-        responsive: true,
+        barGap: 2,
+        responsive: false,
         normalize: false,
         partialRender: false, // Ensure full waveform is rendered
     });
@@ -89,11 +89,16 @@ function exportWaveformWithProgress() {
     // Get the canvas element used by WaveSurfer
     const canvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
 
-    // Clone the original canvas
+    // Create a new canvas with the same dimensions
     const clonedCanvas = document.createElement('canvas');
     clonedCanvas.width = canvas.width;
     clonedCanvas.height = canvas.height;
     const ctx = clonedCanvas.getContext('2d');
+
+    // Fill background with selected color
+    const bgColor = document.getElementById('bgColor').value;
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
 
     // Draw the original waveform onto the new canvas
     ctx.drawImage(canvas, 0, 0);
@@ -106,9 +111,8 @@ function exportWaveformWithProgress() {
     const progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
     const progressImage = new Image();
     progressImage.src = progressCanvas.toDataURL('image/png');
- 
+
     // Draw progress with clipped image put on top of waveform
-    // Create clipping path for played portion
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, 0, playheadX, canvas.height);
@@ -120,8 +124,7 @@ function exportWaveformWithProgress() {
     // Export the final image with the playhead
     const imageURL = clonedCanvas.toDataURL('image/png');
     resolve(imageURL);
-  })
-  
+  });
 }
 
 async function generateVideo() {
@@ -131,7 +134,7 @@ async function generateVideo() {
 
     const frames = [];
     const duration = wavesurfer.getDuration();
-    const fps = 5;
+    const fps = 2;
     const frameCount = Math.ceil(duration * fps);
 
     // Generate frames
