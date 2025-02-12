@@ -7,6 +7,8 @@ A desktop application that automatically generates aesthetic waveform videos fro
 - Convert MP3/WAV files to waveform videos
 - Built-in FFmpeg (no manual installation required)
 
+![Screenshot 2025-02-12 at 13 04 03](https://github.com/user-attachments/assets/006ef4fc-5233-466d-89e7-b0a53539b31c)
+
 ## 📋 Prerequisites
 
 Before running this application, make sure you have the following installed:
