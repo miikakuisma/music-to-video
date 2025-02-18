@@ -77,4 +77,4 @@ ipcMain.handle('generate-video', async (event, { frames, audioPath }) => {
       .on('error', reject)
       .run();
   });
-}); 
+});

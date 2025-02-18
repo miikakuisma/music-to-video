@@ -39,8 +39,8 @@ function initWaveSurfer() {
 document.addEventListener('DOMContentLoaded', () => {
     initWaveSurfer();
     initTextCanvas();
-    setupEventListeners();
     updateColors();
+    setupEventListeners();
 });
 
 function setupEventListeners() {
@@ -72,6 +72,7 @@ function setupEventListeners() {
     document.getElementById('fontSelect').addEventListener('change', renderText);
     document.getElementById('textColor').addEventListener('input', renderText);
     document.getElementById('fontSize').addEventListener('input', renderText);
+
 }
 
 async function handleFileDrop(e) {
@@ -146,6 +147,16 @@ function updateColors() {
         waveColor: waveformColor,
         progressColor: progressColor
     });
+
+    const bgImageInput = document.getElementById('bgImage');
+    const waveformContainer = document.querySelector('.waveform-container');
+    const bgImageUrl = bgImageInput.value;
+    if (bgImageUrl) {
+        waveformContainer.style.backgroundImage = `url(${bgImageUrl})`;
+        waveformContainer.style.backgroundSize = 'cover'; // Adjust as needed
+    } else {
+        waveformContainer.style.backgroundImage = 'none'; // Remove background if no URL
+    }
 }
 
 function exportWaveformWithProgress() {
@@ -159,6 +170,21 @@ function exportWaveformWithProgress() {
         // Fill background
         const bgColor = document.getElementById('bgColor').value;
         ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
+
+        // Draw background image
+        const bgImageUrl = document.getElementById('bgImage').value;
+        if (bgImageUrl) {
+            const bgImage = new Image();
+            bgImage.src = bgImageUrl;
+            ctx.drawImage(bgImage, 0, 0, clonedCanvas.width, clonedCanvas.height);
+        }
+
+        // Draw gradient fill, vertically from transparent to 50% black
+        const gradient = ctx.createLinearGradient(0, 0, 0, clonedCanvas.height);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)'); // Transparent
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)'); // 50% black
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
 
         // Draw the original waveform
