@@ -5,6 +5,8 @@ class WaveSurferCanvas extends HTMLElement {
     this.audiofile = null;
     this.waveformCanvas = null;
     this.progressCanvas = null;
+    this.width = 640;
+    this.height = 360;
   }
   
   connectedCallback() {
@@ -16,8 +18,8 @@ class WaveSurferCanvas extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <div class="waveform-container">
-        <div class="canvas-stack">
+      <div class="waveform-container" style="width: ${this.width}px; height: ${this.height}px;">
+        <div class="canvas-stack" style="width: ${this.width}px; height: ${this.height}px;">
           <canvas id="textOverlay"></canvas>
           <div id="waveform"></div>
         </div>
@@ -30,8 +32,8 @@ class WaveSurferCanvas extends HTMLElement {
       container: this.querySelector('#waveform'),
       waveColor: document.getElementById('waveformColor').value,
       progressColor: document.getElementById('progressColor').value,
-      width: 1280,
-      height: 720,
+      width: this.width,
+      height: this.height,
       barHeight: 1,
       barWidth: 2,
       barGap: 2,

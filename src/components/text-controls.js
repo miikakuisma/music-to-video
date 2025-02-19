@@ -27,7 +27,7 @@ class TextControls extends HTMLElement {
           <option value="Times New Roman">Times New Roman</option>
         </select>
         <input type="color" id="textColor" value="#ffffff">
-        <input type="number" id="fontSize" value="60" min="12" max="256">
+        <input type="number" id="fontSize" value="30" min="12" max="128">
       </div>
     `;
 
@@ -44,8 +44,8 @@ class TextControls extends HTMLElement {
     textCtx = textCanvas.getContext('2d');
     
     // Set canvas size to match waveform
-    textCanvas.width = 1280;
-    textCanvas.height = 720;
+    textCanvas.width = document.querySelector('wave-surfer').width;
+    textCanvas.height = document.querySelector('wave-surfer').height;
     
     // Initial render
     this.renderText();

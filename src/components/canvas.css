@@ -1,15 +1,13 @@
 
 .canvas-stack {
   position: relative;
-  width: 100%;
-  height: 720px;
+  width: 640px;
+  height: 360px;
 }
 
 .waveform-container {
-  width: 1280px;
-  height: 720px;
-  transform: scale(0.5) translateX(320px) translateY(40px);
-  transform-origin: top left;
+  width: 640px;
+  height: 360px;
   background: #fff;
   padding: 20px;
   margin: auto;
