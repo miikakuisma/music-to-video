@@ -81,53 +81,82 @@ async function handleFileDrop(e) {
 
 function exportWaveformWithProgress() {
     return new Promise((resolve, reject) => {
-        const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-        const waveformCanvas = document.querySelector('wave-surfer').waveformCanvas;
-        const progressCanvas = document.querySelector('wave-surfer').progressCanvas;
+        // Grab the wave-surfer element and its canvases
+        const wsElement = document.querySelector('wave-surfer');
+        const wavesurfer = wsElement.wavesurfer;
+        const waveformCanvas = wsElement.waveformCanvas;
+        const progressCanvas = wsElement.progressCanvas;
+        // Get the text overlay canvas (from canvas.js)
+        const textCanvas = document.getElementById('textOverlay');
 
-        // Use stored canvas references instead of querying DOM each time
+        // Use the output dimensions stored on the wave-surfer element.
+        // (Note: when using 720p, these values might be 1280 x 720,
+        // while the inner canvases still have their original lower resolution,
+        // causing the drawn waveform to appear at only a quarter of the area.)
+        const OUTPUT_WIDTH = wsElement.width;
+        const OUTPUT_HEIGHT = wsElement.height;
+
+        // Create an offscreen canvas to composite the final image.
         const clonedCanvas = document.createElement('canvas');
-        clonedCanvas.width = waveformCanvas.width;
-        clonedCanvas.height = waveformCanvas.height;
+        clonedCanvas.width = OUTPUT_WIDTH;
+        clonedCanvas.height = OUTPUT_HEIGHT;
         const ctx = clonedCanvas.getContext('2d');
 
-        // Fill background
+        // Fill the background with the selected color.
         const bgColor = document.getElementById('bgColor').value;
         ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
+        ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-        // Draw background image
+        // Draw background image if provided, scaling it to fill the canvas.
         const bgImageUrl = document.getElementById('bgImage').value;
         if (bgImageUrl) {
             const bgImage = new Image();
             bgImage.src = bgImageUrl;
-            ctx.drawImage(bgImage, 0, 0, clonedCanvas.width, clonedCanvas.height);
+            // Draw the image scaled to the output dimensions.
+            ctx.drawImage(bgImage, 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
         }
 
-        // Draw gradient fill, vertically from transparent to 50% black
-        const gradient = ctx.createLinearGradient(0, 0, 0, clonedCanvas.height);
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)'); // Transparent
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)'); // 50% black
+        // Draw gradient overlay (from transparent to 50% black) over the whole canvas.
+        const gradient = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, clonedCanvas.width, clonedCanvas.height);
+        ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-        // Draw the original waveform
-        ctx.drawImage(waveformCanvas, 0, 0);
+        // Here is the key change: the original waveform canvas has its intrinsic size (e.g. 640 x 360).
+        // When the output is set to a larger size (like 1280 x 720 for 720p) this results in the waveform
+        // image appearing only half the width and height (i.e. one quarter of the area).
+        // To fix this, we scale the waveform canvas to fill the output dimensions.
+        ctx.drawImage(
+            waveformCanvas,
+            0, 0, waveformCanvas.width, waveformCanvas.height,
+            0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
+        );
 
-        // Calculate progress
+        // Calculate the playhead position based on current time progress.
         const progress = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
-        const playheadX = progress * waveformCanvas.width;
+        const playheadX = progress * OUTPUT_WIDTH;
 
-        // Draw progress
+        // Draw the progress overlay: clip to the played portion and scale the progress canvas.
         ctx.save();
         ctx.beginPath();
-        ctx.rect(0, 0, playheadX, waveformCanvas.height);
+        ctx.rect(0, 0, playheadX, OUTPUT_HEIGHT);
         ctx.clip();
-        ctx.drawImage(progressCanvas, 0, 0);
+        ctx.drawImage(
+            progressCanvas,
+            0, 0, progressCanvas.width, progressCanvas.height,
+            0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
+        );
         ctx.restore();
 
-        // Draw text overlay
-        ctx.drawImage(textCanvas, 0, 0);
+        // Draw the text overlay, scaling it appropriately.
+        if (textCanvas) {
+            ctx.drawImage(
+                textCanvas,
+                0, 0, textCanvas.width, textCanvas.height,
+                0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
+            );
+        }
         
         const imageURL = clonedCanvas.toDataURL('image/png');
         resolve(imageURL);
@@ -135,6 +164,7 @@ function exportWaveformWithProgress() {
 }
 
 async function generateVideo() {
+    const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
 
     const renderBtn = document.getElementById('renderBtn');
     renderBtn.disabled = true;
@@ -145,18 +175,18 @@ async function generateVideo() {
     const fps = 2;
     const frameCount = Math.ceil(duration);
 
-    // Generate frames
+    // Generate frames for the video
     for (let i = 0; i < frameCount; i++) {
-        // Calculate progress percentage
+        // Calculate playback progress for this frame.
         const progress = i / frameCount;
         
-        // Set the playback position and wait for seek to complete
+        // Set playback position and wait for the timeupdate event.
         await new Promise(resolve => {
             wavesurfer.seekTo(progress);
             wavesurfer.on('timeupdate', resolve);
         });
         
-        // Add a small delay to ensure rendering is stable
+        // Short delay to ensure proper rendering.
         await new Promise(resolve => setTimeout(resolve, 20));
         
         try {
@@ -172,7 +202,7 @@ async function generateVideo() {
     }
 
     try {
-        // Convert frames to base64 strings before sending
+        // Convert frames to base64 strings before sending.
         const base64Frames = frames.map(frame => frame.toString());
         const outputPath = await require('electron').ipcRenderer.invoke('generate-video', {
             frames: base64Frames,
@@ -185,7 +215,7 @@ async function generateVideo() {
     } finally {
         renderBtn.disabled = false;
         renderBtn.textContent = 'Render Video';
-        // Reset playback position
+        // Reset playback position to the beginning.
         wavesurfer.seekTo(0);
     }
 }

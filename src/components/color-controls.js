@@ -41,6 +41,29 @@ class ColorControls extends HTMLElement {
     document.getElementById('waveformColor').addEventListener('input', this.updateColors);
     document.getElementById('progressColor').addEventListener('input', this.updateColors);
     document.getElementById('bgImage').addEventListener('change', this.updateColors);
+    document.getElementById('sizeMenu').addEventListener('change', () => {
+        // determine the size of the video
+      const size = document.getElementById('sizeMenu').value;
+      const width = size === '1080p' ? 1920 : size === '720p' ? 1280 : size === '480p' ? 960 : 640;
+      const height = size === '1080p' ? 1080 : size === '720p' ? 720 : size === '480p' ? 480 : 360;
+
+      const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+      wavesurfer.setOptions({
+        width: width,
+        height: height
+      });
+
+      // set the size of the waveform container
+      document.querySelector('wave-surfer').width = width;
+      document.querySelector('wave-surfer').height = height;
+      document.querySelector('.waveform-container').style.width = width + 'px';
+      document.querySelector('.waveform-container').style.height = height + 'px';
+      document.querySelector('#textOverlay').setAttribute('width', width + 'px');
+      document.querySelector('#textOverlay').setAttribute('height', height + 'px');
+
+      document.querySelector('text-controls').renderText();
+
+    });
 
     setTimeout(() => {
       this.updateColors();
