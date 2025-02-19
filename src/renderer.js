@@ -1,42 +1,9 @@
-let wavesurfer;
-let audioFile;
-let waveformCanvas;
-let progressCanvas;
 
-// Initialize WaveSurfer
-function initWaveSurfer() {
-    wavesurfer = WaveSurfer.create({
-        container: '#waveform',
-        waveColor: document.getElementById('waveformColor').value,
-        progressColor: document.getElementById('progressColor').value,
-        width: 1280,
-        height: 720,
-        barHeight: 1,
-        barWidth: 2,
-        barGap: 2,
-        barAlign: 'bottom',
-        responsive: false,
-        normalize: false,
-        partialRender: false, // Ensure full waveform is rendered
-    });
 
-    wavesurfer.on('ready', () => {
-        // Get canvas elements once after wavesurfer is ready
-        waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
-        progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
-    });
 
-    // Add error handling for WaveSurfer initialization
-    wavesurfer.on('error', err => {
-        console.error('WaveSurfer error:', err);
-        alert('Error initializing audio visualization. Please try again.');
-    });
-}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    initWaveSurfer();
-    updateColors();
     setupEventListeners();
 });
 
@@ -44,11 +11,6 @@ function setupEventListeners() {
     const dropZone = document.getElementById('dropZone');
     const renderBtn = document.getElementById('renderBtn');
     
-    // Color control events
-    document.getElementById('bgColor').addEventListener('input', updateColors);
-    document.getElementById('waveformColor').addEventListener('input', updateColors);
-    document.getElementById('progressColor').addEventListener('input', updateColors);
-
     // Drop zone events
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -61,11 +23,7 @@ function setupEventListeners() {
 
     dropZone.addEventListener('drop', handleFileDrop);
     
-    renderBtn.addEventListener('click', generateVideo);
-
-    // Add text control event listeners
-    
-    document.getElementById('bgImage').addEventListener('change', updateColors);
+    renderBtn.addEventListener('click', generateVideo);    
 }
 
 async function handleFileDrop(e) {
@@ -120,39 +78,16 @@ async function handleFileDrop(e) {
             }
         }
 
-        wavesurfer.loadBlob(file);
-        wavesurfer.on('ready', () => {
-            setTimeout(() => {
-                document.querySelector('text-controls').renderText();
-            }, 1000);
-        });
-    }
-}
-
-function updateColors() {
-    const bgColor = document.getElementById('bgColor').value;
-    const waveformColor = document.getElementById('waveformColor').value;
-    const progressColor = document.getElementById('progressColor').value;
-
-    document.querySelector('.waveform-container').style.backgroundColor = bgColor;
-    wavesurfer.setOptions({
-        waveColor: waveformColor,
-        progressColor: progressColor
-    });
-
-    const bgImageInput = document.getElementById('bgImage');
-    const waveformContainer = document.querySelector('.waveform-container');
-    const bgImageUrl = bgImageInput.value;
-    if (bgImageUrl) {
-        waveformContainer.style.backgroundImage = `url(${bgImageUrl})`;
-        waveformContainer.style.backgroundSize = 'cover'; // Adjust as needed
-    } else {
-        waveformContainer.style.backgroundImage = 'none'; // Remove background if no URL
+        document.querySelector('wave-surfer').loadFile(file);
     }
 }
 
 function exportWaveformWithProgress() {
     return new Promise((resolve, reject) => {
+        const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+        const waveformCanvas = document.querySelector('wave-surfer').waveformCanvas;
+        const progressCanvas = document.querySelector('wave-surfer').progressCanvas;
+
         // Use stored canvas references instead of querying DOM each time
         const clonedCanvas = document.createElement('canvas');
         clonedCanvas.width = waveformCanvas.width;
@@ -203,6 +138,8 @@ function exportWaveformWithProgress() {
 }
 
 async function generateVideo() {
+    const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+
     const renderBtn = document.getElementById('renderBtn');
     renderBtn.disabled = true;
     renderBtn.textContent = 'Generating...';

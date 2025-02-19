@@ -11,7 +11,7 @@ class TextControls extends HTMLElement {
     setTimeout(() => {
       this.initTextCanvas();
       this.renderText();
-    }, 1000);
+    }, 0);
   }
   
   render() {

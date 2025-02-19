@@ -4,35 +4,19 @@
     <title>Audio Visualizer</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="src/components/text-controls.css">
+    <link rel="stylesheet" href="src/components/color-controls.css">
     <script src="src/wavesurfer.min.js"></script>
     <script src="src/components/canvas.js"></script>
     <script src="src/components/text-controls.js"></script>
+    <script src="src/components/color-controls.js"></script>
     <script src="src/renderer.js"></script>
-
 </head>
 <body>
     <div class="container">
         <div class="drop-zone" id="dropZone">
             Drop audio file here (MP3 or WAV)
-        </div>        
-        <div class="controls">
-            <div class="color-controls">
-                <label>Background Color:
-                    <input type="color" id="bgColor" value="#333333">
-                </label>
-                <label>Waveform Color:
-                    <input type="color" id="waveformColor" value="#b47dfd">
-                </label>
-                <label>Progress Color:
-                    <input type="color" id="progressColor" value="#ffffff">
-                </label>
-                <div>
-                    <label for="bgImage">Background Image URL:</label>
-                    <input type="text" id="bgImage" placeholder="Enter background image URL" value="https://images.unsplash.com/photo-1614852206732-6728910dc175?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjR8fGdyYWRpZW50JTIwZGFya3xlbnwwfHwwfHx8MA%3D%3D">
-                </div>
-            </div>
-            <button id="renderBtn" disabled>Render Video</button>
         </div>
+        <color-controls></color-controls>
         <text-controls></text-controls>
         <wave-surfer></wave-surfer>
     </div>
