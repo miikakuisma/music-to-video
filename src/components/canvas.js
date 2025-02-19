@@ -34,7 +34,7 @@ class WaveSurferCanvas extends HTMLElement {
       progressColor: document.getElementById('progressColor').value,
       width: this.width,
       height: this.height,
-      barHeight: 1,
+      // barHeight: 1,
       barWidth: 2,
       barGap: 2,
       barAlign: 'bottom',

@@ -11,13 +11,13 @@ class ColorControls extends HTMLElement {
     console.log('color-controls: render');
     this.innerHTML = `
       <div class="color-controls">
-        <label>Background Color:
+        <label>Background:
           <input type="color" id="bgColor" value="#666666">
         </label>
-        <label>Waveform Color:
+        <label>Waveform:
           <input type="color" id="waveformColor" value="#b47dfd">
         </label>
-        <label>Progress Color:
+        <label>Progress:
           <input type="color" id="progressColor" value="#ffffff">
         </label>
         <div>

@@ -21,13 +21,15 @@ class TextControls extends HTMLElement {
       <div class="text-controls">
         <input type="text" id="songTitleInput" placeholder="Song Title">
         <input type="text" id="artistNameInput" placeholder="Artist Name">
-        <select id="fontSelect">
-          <option value="Arial">Arial</option>
-          <option value="Helvetica">Helvetica</option>
-          <option value="Times New Roman">Times New Roman</option>
-        </select>
-        <input type="color" id="textColor" value="#ffffff">
-        <input type="number" id="fontSize" value="30" min="12" max="128">
+        <div class="text-controls-row">
+          <select id="fontSelect">
+            <option value="Arial">Arial</option>
+            <option value="Helvetica">Helvetica</option>
+            <option value="Times New Roman">Times New Roman</option>
+          </select>
+          <input type="color" id="textColor" value="#ffffff">
+          <input type="number" id="fontSize" value="30" min="12" max="128">
+        </div>
       </div>
     `;
 
