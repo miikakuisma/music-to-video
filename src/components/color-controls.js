@@ -10,21 +10,19 @@ class ColorControls extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <div class="controls">
-        <div class="color-controls">
-          <label>Background Color:
-            <input type="color" id="bgColor" value="#333333">
-          </label>
-          <label>Waveform Color:
-            <input type="color" id="waveformColor" value="#b47dfd">
-          </label>
-          <label>Progress Color:
-            <input type="color" id="progressColor" value="#ffffff">
-          </label>
-          <div>
-            <label for="bgImage">Background Image URL:</label>
-            <input type="text" id="bgImage" placeholder="Enter background image URL" value="https://images.unsplash.com/photo-1614852206732-6728910dc175?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjR8fGdyYWRpZW50JTIwZGFya3xlbnwwfHwwfHx8MA%3D%3D">
-          </div>
+      <div class="color-controls">
+        <label>Background Color:
+          <input type="color" id="bgColor" value="#333333">
+        </label>
+        <label>Waveform Color:
+          <input type="color" id="waveformColor" value="#b47dfd">
+        </label>
+        <label>Progress Color:
+          <input type="color" id="progressColor" value="#ffffff">
+        </label>
+        <div>
+          <label for="bgImage">Background Image URL:</label>
+          <input type="text" id="bgImage" placeholder="Enter background image URL" value="https://images.unsplash.com/photo-1614852206732-6728910dc175?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjR8fGdyYWRpZW50JTIwZGFya3xlbnwwfHwwfHx8MA%3D%3D">
         </div>
         <button id="renderBtn" disabled>Render Video</button>
       </div>

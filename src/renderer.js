@@ -1,14 +1,11 @@
 
-
-
-
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
 function setupEventListeners() {
-    const dropZone = document.getElementById('dropZone');
+    const dropZone = document.querySelector('.drop-zone');
     const renderBtn = document.getElementById('renderBtn');
     
     // Drop zone events
@@ -28,7 +25,7 @@ function setupEventListeners() {
 
 async function handleFileDrop(e) {
     e.preventDefault();
-    const dropZone = document.getElementById('dropZone');
+    const dropZone = document.querySelector('.drop-zone');
     dropZone.classList.remove('drag-over');
 
     const file = e.dataTransfer.files[0];

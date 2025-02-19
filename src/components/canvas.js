@@ -9,11 +9,9 @@ class WaveSurferCanvas extends HTMLElement {
   
   connectedCallback() {
     this.render();
-    
-
     document.addEventListener('DOMContentLoaded', () => {
       this.initWaveSurfer();
-  });
+    });
   }
   
   render() {
@@ -25,7 +23,6 @@ class WaveSurferCanvas extends HTMLElement {
         </div>
       </div>
     `;
-
   }
 
   initWaveSurfer() {

@@ -17,17 +17,15 @@ class TextControls extends HTMLElement {
   render() {
     this.innerHTML = `
       <div class="text-controls">
-        <div class="text-input-group">
-          <input type="text" id="songTitleInput" placeholder="Song Title">
-          <input type="text" id="artistNameInput" placeholder="Artist Name">
-          <select id="fontSelect">
-            <option value="Arial">Arial</option>
-            <option value="Helvetica">Helvetica</option>
-            <option value="Times New Roman">Times New Roman</option>
-          </select>
-          <input type="color" id="textColor" value="#ffffff">
-          <input type="number" id="fontSize" value="60" min="12" max="256">
-        </div>
+        <input type="text" id="songTitleInput" placeholder="Song Title">
+        <input type="text" id="artistNameInput" placeholder="Artist Name">
+        <select id="fontSelect">
+          <option value="Arial">Arial</option>
+          <option value="Helvetica">Helvetica</option>
+          <option value="Times New Roman">Times New Roman</option>
+        </select>
+        <input type="color" id="textColor" value="#ffffff">
+        <input type="number" id="fontSize" value="60" min="12" max="256">
       </div>
     `;
 
