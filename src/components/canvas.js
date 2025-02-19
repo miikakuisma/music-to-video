@@ -59,9 +59,9 @@ class WaveSurferCanvas extends HTMLElement {
   }
 
   loadFile(file) {
+    this.querySelector('.waveform-container').classList.add('file-loaded');
     this.wavesurfer.loadBlob(file);
     this.wavesurfer.on('ready', () => {
-      this.classList.add('file-loaded');
       setTimeout(() => {
         document.querySelector('text-controls').renderText();
         document.querySelector('color-controls').updateColors();

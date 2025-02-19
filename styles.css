@@ -38,4 +38,7 @@ button:disabled {
     width: 300px;
     height: 100%;
     z-index: 999;
+    padding: 20px;
+    background: #222;
+    border-left: 3px solid #333;
 }

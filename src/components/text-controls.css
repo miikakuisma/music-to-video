@@ -1,9 +1,6 @@
 .text-controls {
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 4px;
   gap: 10px;
 }
 

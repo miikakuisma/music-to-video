@@ -159,7 +159,6 @@ function exportWaveformWithProgress() {
 
 async function generateVideo() {
     const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-
     const renderBtn = document.getElementById('renderBtn');
     renderBtn.disabled = true;
     renderBtn.textContent = 'Generating...';
@@ -200,9 +199,8 @@ async function generateVideo() {
         const base64Frames = frames.map(frame => frame.toString());
         const outputPath = await require('electron').ipcRenderer.invoke('generate-video', {
             frames: base64Frames,
-            audioPath: audioFile.path
-        });
-        
+            audioPath: document.querySelector('wave-surfer').audiofile.path
+        });        
         alert(`Video generated successfully!\nSaved to: ${outputPath}`);
     } catch (error) {
         alert('Error generating video: ' + error.message);

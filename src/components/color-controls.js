@@ -48,10 +48,15 @@ class ColorControls extends HTMLElement {
       const height = size === '1080p' ? 1080 : size === '720p' ? 720 : size === '480p' ? 480 : 360;
 
       const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-      wavesurfer.setOptions({
-        width: width,
-        height: height
-      });
+
+      try {
+        wavesurfer.setOptions({
+          width: width,
+          height: height
+        });
+      } catch (error) {
+        console.error('Error setting waveform options:', error);
+      }
 
       // set the size of the waveform container
       document.querySelector('wave-surfer').width = width;
