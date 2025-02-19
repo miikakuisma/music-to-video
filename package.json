@@ -1,7 +1,7 @@
 {
-  "name": "audio-visualizer",
+  "name": "wave-render",
   "version": "1.0.0",
-  "description": "Audio visualization and video generator",
+  "description": "Render audio to video",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -19,8 +19,8 @@
     "electron-builder": "^23.0.0"
   },
   "build": {
-    "appId": "com.example.audiovisualizer",
-    "productName": "Audio Visualizer",
+    "appId": "dev.tatami.waverender",
+    "productName": "Wave Render",
     "files": [
       "main.js",
       "index.html",

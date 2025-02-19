@@ -1,7 +1,5 @@
 let wavesurfer;
 let audioFile;
-let textCanvas;
-let textCtx;
 let waveformCanvas;
 let progressCanvas;
 
@@ -38,7 +36,6 @@ function initWaveSurfer() {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     initWaveSurfer();
-    initTextCanvas();
     updateColors();
     setupEventListeners();
 });
@@ -67,12 +64,8 @@ function setupEventListeners() {
     renderBtn.addEventListener('click', generateVideo);
 
     // Add text control event listeners
-    document.getElementById('songTitleInput').addEventListener('input', renderText);
-    document.getElementById('artistNameInput').addEventListener('input', renderText);
-    document.getElementById('fontSelect').addEventListener('change', renderText);
-    document.getElementById('textColor').addEventListener('input', renderText);
-    document.getElementById('fontSize').addEventListener('input', renderText);
-
+    
+    document.getElementById('bgImage').addEventListener('change', updateColors);
 }
 
 async function handleFileDrop(e) {
@@ -84,7 +77,6 @@ async function handleFileDrop(e) {
     console.log(file);
     if (file && (file.type === 'audio/mpeg' || file.type === 'audio/wav')) {
         audioFile = file;
-        document.getElementById('songTitle').textContent = file.name;
         document.getElementById('renderBtn').disabled = false;
 
         if (file.type === 'audio/mpeg') {
@@ -130,9 +122,9 @@ async function handleFileDrop(e) {
 
         wavesurfer.loadBlob(file);
         wavesurfer.on('ready', () => {
-            const duration = wavesurfer.getDuration();
-            document.getElementById('duration').textContent = formatTime(duration);
-            renderText();
+            setTimeout(() => {
+                document.querySelector('text-controls').renderText();
+            }, 1000);
         });
     }
 }
@@ -210,41 +202,6 @@ function exportWaveformWithProgress() {
     });
 }
 
-function initTextCanvas() {
-    textCanvas = document.getElementById('textOverlay');
-    textCtx = textCanvas.getContext('2d');
-    
-    // Set canvas size to match waveform
-    textCanvas.width = 1280;
-    textCanvas.height = 720;
-    
-    // Initial render
-    renderText();
-}
-
-function renderText() {
-    // Clear the canvas
-    textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
-    
-    // Get text properties
-    const songTitle = document.getElementById('songTitleInput').value;
-    const artistName = document.getElementById('artistNameInput').value;
-    const font = document.getElementById('fontSelect').value;
-    const color = document.getElementById('textColor').value;
-    const size = document.getElementById('fontSize').value;
-    
-    textCtx.fillStyle = color;
-    textCtx.textAlign = 'center';
-    
-    // Render song title
-    textCtx.font = `bold ${size}px ${font}`;
-    textCtx.fillText(songTitle, textCanvas.width / 2, 50);
-    
-    // Render artist name
-    textCtx.font = `${size * 0.8}px ${font}`;
-    textCtx.fillText(artistName, textCanvas.width / 2, 50 + size * 1.2);
-}
-
 async function generateVideo() {
     const renderBtn = document.getElementById('renderBtn');
     renderBtn.disabled = true;
@@ -299,9 +256,3 @@ async function generateVideo() {
         wavesurfer.seekTo(0);
     }
 }
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-} 
