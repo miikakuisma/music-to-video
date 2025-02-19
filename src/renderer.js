@@ -135,7 +135,6 @@ function exportWaveformWithProgress() {
 }
 
 async function generateVideo() {
-    const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
 
     const renderBtn = document.getElementById('renderBtn');
     renderBtn.disabled = true;

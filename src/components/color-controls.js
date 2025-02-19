@@ -4,8 +4,7 @@ class ColorControls extends HTMLElement {
   }
   
   connectedCallback() {
-    this.render();
-    
+    this.render();    
   }
   
   render() {
@@ -29,8 +28,9 @@ class ColorControls extends HTMLElement {
           <label for="sizeMenu">Size:</label>
           <select id="sizeMenu">
             <option value="1080p">1080p</option>
-            <option value="720p" selected>720p</option>
+            <option value="720p">720p</option>
             <option value="480p">480p</option>
+            <option value="360p" selected>360p</option>
           </select>
         </div>
         <button id="renderBtn" disabled>Render Video</button>

@@ -1,10 +1,3 @@
-
-.canvas-stack {
-  position: relative;
-  width: 640px;
-  height: 360px;
-}
-
 .waveform-container {
   width: 640px;
   height: 360px;
@@ -15,8 +8,14 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.canvas-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 #waveform {
-  margin-bottom: 10px;
+
 }
 
 .background-shadow-overlay {

@@ -19,7 +19,7 @@ class WaveSurferCanvas extends HTMLElement {
   render() {
     this.innerHTML = `
       <div class="waveform-container" style="width: ${this.width}px; height: ${this.height}px;">
-        <div class="canvas-stack" style="width: ${this.width}px; height: ${this.height}px;">
+        <div class="canvas-stack">
           <canvas id="textOverlay"></canvas>
           <div id="waveform"></div>
         </div>
@@ -38,7 +38,7 @@ class WaveSurferCanvas extends HTMLElement {
       barWidth: 2,
       barGap: 2,
       barAlign: 'bottom',
-      responsive: false,
+      responsive: true,
       normalize: false,
       partialRender: false, // Ensure full waveform is rendered
     });
