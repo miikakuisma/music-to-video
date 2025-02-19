@@ -31,7 +31,7 @@ async function handleFileDrop(e) {
     const file = e.dataTransfer.files[0];
     console.log(file);
     if (file && (file.type === 'audio/mpeg' || file.type === 'audio/wav')) {
-        audioFile = file;
+        document.querySelector('wave-surfer').audiofile = file;
         document.getElementById('renderBtn').disabled = false;
 
         if (file.type === 'audio/mpeg') {
@@ -90,9 +90,6 @@ function exportWaveformWithProgress() {
         const textCanvas = document.getElementById('textOverlay');
 
         // Use the output dimensions stored on the wave-surfer element.
-        // (Note: when using 720p, these values might be 1280 x 720,
-        // while the inner canvases still have their original lower resolution,
-        // causing the drawn waveform to appear at only a quarter of the area.)
         const OUTPUT_WIDTH = wsElement.width;
         const OUTPUT_HEIGHT = wsElement.height;
 
@@ -123,10 +120,7 @@ function exportWaveformWithProgress() {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-        // Here is the key change: the original waveform canvas has its intrinsic size (e.g. 640 x 360).
-        // When the output is set to a larger size (like 1280 x 720 for 720p) this results in the waveform
-        // image appearing only half the width and height (i.e. one quarter of the area).
-        // To fix this, we scale the waveform canvas to fill the output dimensions.
+        // Draw the waveform canvas
         ctx.drawImage(
             waveformCanvas,
             0, 0, waveformCanvas.width, waveformCanvas.height,
@@ -149,7 +143,7 @@ function exportWaveformWithProgress() {
         );
         ctx.restore();
 
-        // Draw the text overlay, scaling it appropriately.
+        // Draw the text overlay
         if (textCanvas) {
             ctx.drawImage(
                 textCanvas,

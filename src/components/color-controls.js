@@ -12,7 +12,7 @@ class ColorControls extends HTMLElement {
     this.innerHTML = `
       <div class="color-controls">
         <label>Background Color:
-          <input type="color" id="bgColor" value="#333333">
+          <input type="color" id="bgColor" value="#666666">
         </label>
         <label>Waveform Color:
           <input type="color" id="waveformColor" value="#b47dfd">
@@ -62,7 +62,6 @@ class ColorControls extends HTMLElement {
       document.querySelector('#textOverlay').setAttribute('height', height + 'px');
 
       document.querySelector('text-controls').renderText();
-
     });
 
     setTimeout(() => {
@@ -77,6 +76,7 @@ class ColorControls extends HTMLElement {
     const progressColor = document.getElementById('progressColor').value;
 
     document.querySelector('.waveform-container').style.backgroundColor = bgColor;
+
     try {
       document.querySelector('wave-surfer').wavesurfer.setOptions({
         waveColor: waveformColor,
@@ -86,10 +86,11 @@ class ColorControls extends HTMLElement {
       console.error('Error setting waveform options:', error);
     }
     
+    const audioLoaded = document.querySelector('wave-surfer').audiofile !== null;
     const bgImageInput = document.getElementById('bgImage');
     const waveformContainer = document.querySelector('.waveform-container');
     const bgImageUrl = bgImageInput.value;
-    if (bgImageUrl) {
+    if (bgImageUrl && audioLoaded) {
         waveformContainer.style.backgroundImage = `url(${bgImageUrl})`;
         waveformContainer.style.backgroundSize = 'cover'; // Adjust as needed
     } else {

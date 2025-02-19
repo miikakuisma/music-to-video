@@ -4,14 +4,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.drop-zone {
-
-}
-
-.drop-zone.drag-over {
-    background-color: #e1f5fe;
-}
-
 button {
     padding: 10px 20px;
     background-color: #1e88e5;

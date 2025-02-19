@@ -61,10 +61,12 @@ class WaveSurferCanvas extends HTMLElement {
   loadFile(file) {
     this.wavesurfer.loadBlob(file);
     this.wavesurfer.on('ready', () => {
+      this.classList.add('file-loaded');
       setTimeout(() => {
-          document.querySelector('text-controls').renderText();
+        document.querySelector('text-controls').renderText();
+        document.querySelector('color-controls').updateColors();
       }, 0);
-  });
+    });
   }
 }
 
