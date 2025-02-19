@@ -7,6 +7,7 @@ class TextControls extends HTMLElement {
   }
   
   connectedCallback() {
+    console.log('text-controls: connectedCallback');
     this.render();
     setTimeout(() => {
       this.initTextCanvas();
@@ -15,6 +16,7 @@ class TextControls extends HTMLElement {
   }
   
   render() {
+    console.log('text-controls: render');
     this.innerHTML = `
       <div class="text-controls">
         <input type="text" id="songTitleInput" placeholder="Song Title">
@@ -37,6 +39,7 @@ class TextControls extends HTMLElement {
   }
 
   initTextCanvas() {
+    console.log('text-controls: initTextCanvas');
     textCanvas = document.getElementById('textOverlay');
     textCtx = textCanvas.getContext('2d');
     
@@ -49,16 +52,28 @@ class TextControls extends HTMLElement {
   }
 
   renderText() {
+    console.log('text-controls: renderText');
+    // Retrieve the canvas element by its ID (as defined in your WaveSurferCanvas markup)
+    const textCanvas = document.getElementById('textOverlay');
+    if (!textCanvas) {
+      console.error('Text overlay canvas not found.');
+      return;
+    }
+    
+    // Get the canvas 2D context
+    const textCtx = textCanvas.getContext('2d');
+    
     // Clear the canvas
     textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
     
-    // Get text properties
+    // Get text properties from input fields
     const songTitle = document.getElementById('songTitleInput').value;
     const artistName = document.getElementById('artistNameInput').value;
     const font = document.getElementById('fontSelect').value;
     const color = document.getElementById('textColor').value;
     const size = document.getElementById('fontSize').value;
     
+    // Set styling
     textCtx.fillStyle = color;
     textCtx.textAlign = 'center';
     

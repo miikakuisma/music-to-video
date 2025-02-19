@@ -9,6 +9,7 @@ class ColorControls extends HTMLElement {
   }
   
   render() {
+    console.log('color-controls: render');
     this.innerHTML = `
       <div class="color-controls">
         <label>Background Color:
@@ -39,6 +40,7 @@ class ColorControls extends HTMLElement {
   }
 
   updateColors() {
+    console.log('color-controls: updateColors');
     const bgColor = document.getElementById('bgColor').value;
     const waveformColor = document.getElementById('waveformColor').value;
     const progressColor = document.getElementById('progressColor').value;
