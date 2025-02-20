@@ -1,13 +1,14 @@
 # Music to Video
 
+![Screenshot 2025-02-20 at 11 31 05](https://github.com/user-attachments/assets/d5fcefd1-a7a3-41ae-9452-46b51cd2b9dd)
+
+
 A desktop application that automatically generates aesthetic waveform videos from your audio files. Simply drag and drop your MP3 or WAV files and get beautiful visualizations perfect for YouTube, social media, or any platform that requires video format.
 
 ## ✨ Features
 
 - Convert MP3/WAV files to waveform videos
 - Built-in FFmpeg (no manual installation required)
-
-![Screenshot 2025-02-12 at 13 04 03](https://github.com/user-attachments/assets/006ef4fc-5233-466d-89e7-b0a53539b31c)
 
 ## 📋 Prerequisites
 
