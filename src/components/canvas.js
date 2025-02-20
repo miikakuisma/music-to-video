@@ -22,32 +22,39 @@ class WaveSurferCanvas extends HTMLElement {
         <div class="canvas-stack">
           <canvas id="textOverlay"></canvas>
           <div id="waveform"></div>
+          <div class="background-shadow-overlay"></div>
         </div>
       </div>
     `;
   }
 
   initWaveSurfer() {
-    this.wavesurfer = WaveSurfer.create({
+
+    const settings = {
       container: this.querySelector('#waveform'),
       waveColor: document.getElementById('waveformColor').value,
       progressColor: document.getElementById('progressColor').value,
       width: this.width,
-      height: this.height,
+      height: this.height / 1.5,
       // barHeight: 1,
-      barWidth: 2,
-      barGap: 2,
-      barAlign: 'bottom',
+      cursorWidth: 0,
+      barWidth: parseInt(document.getElementById('barWidth').value) || 4,
+      barGap: parseInt(document.getElementById('barGap').value) || 2,
+      barAlign: document.getElementById('barAlign').value || 'bottom',
       responsive: true,
       normalize: false,
-      partialRender: false, // Ensure full waveform is rendered
-    });
+      partialRender: false,
+    }
+
+    this.wavesurfer = WaveSurfer.create(settings);
+
+    // Store current settings
+    this.waveformSettings = settings;
 
     this.wavesurfer.on('ready', () => {
       // Get canvas elements once after wavesurfer is ready
       this.waveformCanvas = this.wavesurfer.renderer.canvasWrapper.querySelector('canvas');
       this.progressCanvas = this.wavesurfer.renderer.progressWrapper.querySelector('canvas');
-
       document.querySelector('color-controls').updateColors();
     });
 

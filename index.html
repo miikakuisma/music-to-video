@@ -2,10 +2,8 @@
 <html>
 <head>
     <title>Wave Render</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dist/styles.css">
     <link rel="stylesheet" href="src/components/canvas.css">
-    <link rel="stylesheet" href="src/components/text-controls.css">
-    <link rel="stylesheet" href="src/components/color-controls.css">
     <script src="src/wavesurfer.min.js"></script>
     <script src="src/components/canvas.js"></script>
     <script src="src/components/text-controls.js"></script>
@@ -13,11 +11,13 @@
     <script src="src/renderer.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="left drop-zone">
-            <wave-surfer></wave-surfer>
+    <div class="container flex flex-row w-full h-screen max-w-none">
+        <div class="left drop-zone flex justify-center items-center w-[calc(100%-300px)] h-full bg-gray-900">
+            <div class="preview bg-black p-4 rounded-lg">
+                <wave-surfer></wave-surfer>
+            </div>
         </div>
-        <div class="right">
+        <div class="right w-[300px] h-full flex z-99 p-0 flex-col justify-start items-center bg-gray-800 border-l-2 border-gray-700 overflow-y-auto overflow-x-hidden">
             <text-controls></text-controls>
             <color-controls></color-controls>
         </div>

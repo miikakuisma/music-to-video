@@ -18,17 +18,30 @@ class TextControls extends HTMLElement {
   render() {
     console.log('text-controls: render');
     this.innerHTML = `
-      <div class="text-controls">
-        <input type="text" id="songTitleInput" placeholder="Song Title">
-        <input type="text" id="artistNameInput" placeholder="Artist Name">
-        <div class="text-controls-row">
-          <select id="fontSelect">
-            <option value="Arial">Arial</option>
-            <option value="Helvetica">Helvetica</option>
-            <option value="Times New Roman">Times New Roman</option>
-          </select>
-          <input type="color" id="textColor" value="#ffffff">
-          <input type="number" id="fontSize" value="30" min="12" max="128">
+      <div class="p-6">
+        <div class="space-y-6">
+          <details open>
+            <summary class="mb-2 text-sm text-gray-500">Text</summary>
+            <div class="form-group">
+              <input type="text" id="songTitleInput" placeholder="Song Title" class="form-input">
+            </div>
+          
+            <div class="form-group">
+              <input type="text" id="artistNameInput" placeholder="Artist Name" class="form-input">
+            </div>
+            
+            <div class="flex gap-2 items-center">
+              <select id="fontSelect" class="form-input flex-grow">
+                <option value="Arial">Arial</option>
+                <option value="Helvetica">Helvetica</option>
+                <option value="Times New Roman">Times New Roman</option>
+              </select>
+              <input type="number" id="fontSize" value="30" min="12" max="128" 
+                class="form-input w-20">
+                <input type="color" id="textColor" value="#ffffff" class="color-input">
+              </div>
+            </div>
+          </details>
         </div>
       </div>
     `;

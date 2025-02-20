@@ -1,4 +1,3 @@
-
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
@@ -29,7 +28,20 @@ async function handleFileDrop(e) {
     dropZone.classList.remove('drag-over');
 
     const file = e.dataTransfer.files[0];
-    console.log(file);
+    
+    // Handle image files
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target.result;
+            document.getElementById('bgImage').value = imageUrl;
+            document.querySelector('color-controls').updateColors();
+        };
+        reader.readAsDataURL(file);
+        return;
+    }
+    
+    // Handle audio files (existing code)
     if (file && (file.type === 'audio/mpeg' || file.type === 'audio/wav')) {
         document.querySelector('wave-surfer').audiofile = file;
         document.getElementById('renderBtn').disabled = false;
@@ -116,7 +128,7 @@ function exportWaveformWithProgress() {
         // Draw gradient overlay (from transparent to 50% black) over the whole canvas.
         const gradient = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT);
         gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
@@ -124,7 +136,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
             waveformCanvas,
             0, 0, waveformCanvas.width, waveformCanvas.height,
-            0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
+            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 1.5), OUTPUT_WIDTH, OUTPUT_HEIGHT / 1.5
         );
 
         // Calculate the playhead position based on current time progress.
@@ -139,7 +151,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
             progressCanvas,
             0, 0, progressCanvas.width, progressCanvas.height,
-            0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
+            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 1.5), OUTPUT_WIDTH, OUTPUT_HEIGHT / 1.5
         );
         ctx.restore();
 
