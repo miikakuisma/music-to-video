@@ -7,7 +7,7 @@
 }
 
 .waveform-container:not(.file-loaded):after {
-  content: "Drop your audio file here";
+  content: "Drop your audio or image file here";
   position: absolute;
   top: 0;
   left: 0;
@@ -17,7 +17,7 @@
   justify-content: center;
   align-items: center;
   font-size: 16px;
-  color: #222;  
+  color: #ccc;  
 }
 
 .drop-zone {

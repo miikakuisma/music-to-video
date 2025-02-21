@@ -187,9 +187,7 @@ async function generateVideo() {
     const frameInterval = duration / frameCount;
 
     // Show progress
-    const progressText = document.createElement('div');
-    progressText.className = 'absolute text-sm text-gray-500 mt-6';
-    document.querySelector('.preview').appendChild(progressText);
+    const progressText = document.querySelector('.progress-text');
 
     // Generate frames for the video
     for (let i = 0; i < frameCount; i++) {
@@ -210,7 +208,6 @@ async function generateVideo() {
             frames.push(imageData.toString()); // Convert to string immediately to save memory
         } catch (err) {
             console.error('Error exporting frame:', err);
-            progressText.remove();
             alert('Error generating video frames. Please try again.');
             renderBtn.disabled = false;
             renderBtn.textContent = 'Render Video';

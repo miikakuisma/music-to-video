@@ -13,8 +13,9 @@
 <body>
     <div class="container flex flex-row w-full h-screen max-w-none">
         <div class="left drop-zone flex justify-center items-center w-[calc(100%-300px)] h-full bg-gray-900">
-            <div class="preview bg-black p-4 rounded-lg">
+            <div class="preview bg-black p-4 rounded-lg relative">
                 <wave-surfer></wave-surfer>
+                <div class="progress-text absolute bottom-0 left-1/2 -translate-x-1/2 text-sm text-gray-500 translate-y-6"></div>
             </div>
         </div>
         <div class="right w-[300px] h-full flex z-99 p-0 flex-col justify-start items-center bg-gray-800 border-l-2 border-gray-700 overflow-y-auto overflow-x-hidden">
