@@ -188,8 +188,8 @@ async function generateVideo() {
 
     // Show progress
     const progressText = document.createElement('div');
-    progressText.className = 'text-sm text-gray-400 mt-2';
-    renderBtn.parentNode.appendChild(progressText);
+    progressText.className = 'absolute text-sm text-gray-500 mt-6';
+    document.querySelector('.preview').appendChild(progressText);
 
     // Generate frames for the video
     for (let i = 0; i < frameCount; i++) {

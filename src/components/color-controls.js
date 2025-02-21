@@ -4,7 +4,7 @@ class ColorControls extends HTMLElement {
   }
   
   connectedCallback() {
-    this.render();    
+    this.render();
   }
   
   render() {
