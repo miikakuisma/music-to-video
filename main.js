@@ -34,9 +34,9 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.handle('generate-video', async (event, { frames, audioPath }) => {
+ipcMain.handle('generate-video', async (event, { frames, audioPath, frameInterval }) => {
   const outputPath = path.join(__dirname, 'output.mp4');
-  const tempDir = path.join(__dirname, 'assets', 'temp');
+  const tempDir = path.join(app.getPath('temp'), 'wave-render');
 
   // Ensure temp directory exists
   if (!fs.existsSync(tempDir)) {
@@ -54,7 +54,7 @@ ipcMain.handle('generate-video', async (event, { frames, audioPath }) => {
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input(path.join(tempDir, 'frame_%d.png'))
-      .inputFPS(1)
+      .inputFPS(1/frameInterval)
       .input(audioPath)
       .videoCodec('libx264')
       .audioCodec('aac')
@@ -64,7 +64,9 @@ ipcMain.handle('generate-video', async (event, { frames, audioPath }) => {
         '-movflags +faststart', // Enable streaming
         '-preset medium', // Encoding preset for good balance of quality/speed
         '-profile:v main', // Main profile for better compatibility
-        '-level 3.1' // Common compatibility level
+        '-level 3.1', // Common compatibility level
+        '-crf 23',
+        '-b:a 192k'
       ])
       .output(outputPath)
       .on('end', () => {
@@ -74,7 +76,9 @@ ipcMain.handle('generate-video', async (event, { frames, audioPath }) => {
         });
         resolve(outputPath);
       })
-      .on('error', reject)
+      .on('error', (err) => {
+        reject(new Error(`FFmpeg error: ${err.message}`));
+      })
       .run();
   });
 });

@@ -175,30 +175,42 @@ async function generateVideo() {
     renderBtn.disabled = true;
     renderBtn.textContent = 'Generating...';
 
-    const frames = [];
     const duration = wavesurfer.getDuration();
-    const fps = 2;
-    const frameCount = Math.ceil(duration);
+    const frames = [];
+    
+    // Get video width from wavesurfer
+    const videoWidth = wavesurfer.width || 640; // fallback to 640 if not set
+    
+    // Calculate frame count based on video width
+    // Never generate more frames than pixels we have
+    const frameCount = Math.min(videoWidth, Math.ceil(duration));
+    const frameInterval = duration / frameCount;
+
+    // Show progress
+    const progressText = document.createElement('div');
+    progressText.className = 'text-sm text-gray-400 mt-2';
+    renderBtn.parentNode.appendChild(progressText);
 
     // Generate frames for the video
     for (let i = 0; i < frameCount; i++) {
-        // Calculate playback progress for this frame.
-        const progress = i / frameCount;
+        const progress = (i * frameInterval) / duration;
         
-        // Set playback position and wait for the timeupdate event.
+        // Update progress text
+        progressText.textContent = `Generating frame ${i + 1}/${frameCount}`;
+        
         await new Promise(resolve => {
             wavesurfer.seekTo(progress);
             wavesurfer.on('timeupdate', resolve);
         });
         
-        // Short delay to ensure proper rendering.
         await new Promise(resolve => setTimeout(resolve, 20));
         
         try {
             const imageData = await exportWaveformWithProgress();
-            frames.push(imageData);
+            frames.push(imageData.toString()); // Convert to string immediately to save memory
         } catch (err) {
             console.error('Error exporting frame:', err);
+            progressText.remove();
             alert('Error generating video frames. Please try again.');
             renderBtn.disabled = false;
             renderBtn.textContent = 'Render Video';
@@ -206,20 +218,21 @@ async function generateVideo() {
         }
     }
 
+    progressText.textContent = 'Encoding video...';
+
     try {
-        // Convert frames to base64 strings before sending.
-        const base64Frames = frames.map(frame => frame.toString());
         const outputPath = await require('electron').ipcRenderer.invoke('generate-video', {
-            frames: base64Frames,
-            audioPath: document.querySelector('wave-surfer').audiofile.path
+            frames,
+            audioPath: document.querySelector('wave-surfer').audiofile.path,
+            frameInterval
         });        
         alert(`Video generated successfully!\nSaved to: ${outputPath}`);
     } catch (error) {
         alert('Error generating video: ' + error.message);
     } finally {
+        progressText.remove();
         renderBtn.disabled = false;
         renderBtn.textContent = 'Render Video';
-        // Reset playback position to the beginning.
         wavesurfer.seekTo(0);
     }
 }
