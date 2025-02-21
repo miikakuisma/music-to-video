@@ -106,14 +106,14 @@ class ColorControls extends HTMLElement {
       </div>
     `;
 
-    document.getElementById('bgColor').addEventListener('input', this.updateColors);
-    document.getElementById('waveformColor').addEventListener('input', this.updateColors);
-    document.getElementById('progressColor').addEventListener('input', this.updateColors);
+    document.getElementById('bgColor').addEventListener('change', this.updateColors);
+    document.getElementById('waveformColor').addEventListener('change', this.updateColors);
+    document.getElementById('progressColor').addEventListener('change', this.updateColors);
     document.getElementById('bgImage').addEventListener('change', this.updateColors);
 
-    document.getElementById('barWidth').addEventListener('input', this.updateColors);
-    document.getElementById('barGap').addEventListener('input', this.updateColors);
-    document.getElementById('cursorWidth').addEventListener('input', this.updateColors);
+    document.getElementById('barWidth').addEventListener('change', this.updateColors);
+    document.getElementById('barGap').addEventListener('change', this.updateColors);
+    document.getElementById('cursorWidth').addEventListener('change', this.updateColors);
     document.getElementById('barAlign').addEventListener('change', this.updateColors);
 
     document.getElementById('sizeMenu').addEventListener('change', () => {
