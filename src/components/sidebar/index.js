@@ -24,8 +24,6 @@ class SideBar extends HTMLElement {
       </div>
     `;
   }
-
-  
 }
 
 // Define the custom element if not already defined

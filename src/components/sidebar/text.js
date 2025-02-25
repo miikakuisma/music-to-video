@@ -16,7 +16,6 @@ class TextControls extends HTMLElement {
   }
   
   render() {
-    console.log('text-controls: render');
     this.innerHTML = `
       <details open>
         <summary class="mb-2 text-sm text-gray-500">Text</summary>
@@ -39,6 +38,20 @@ class TextControls extends HTMLElement {
             <input type="color" id="textColor" value="#ffffff" class="color-input">
           </div>
         </div>
+
+        <div class="form-group mt-4">
+          <select id="textAlign" class="form-input">
+            <option value="top-left">Top Left</option>
+            <option value="top-center" selected>Top Center</option>
+            <option value="top-right">Top Right</option>
+            <option value="center-left">Center Left</option>
+            <option value="center-center">Center Center</option>
+            <option value="center-right">Center Right</option>
+            <option value="bottom-left">Bottom Left</option>
+            <option value="bottom-center">Bottom Center</option>
+            <option value="bottom-right">Bottom Right</option>
+          </select>
+        </div>
       </details>
     `;
 
@@ -47,6 +60,7 @@ class TextControls extends HTMLElement {
     document.getElementById('fontSelect').addEventListener('change', this.renderText);
     document.getElementById('textColor').addEventListener('input', this.renderText);
     document.getElementById('fontSize').addEventListener('input', this.renderText);
+    document.getElementById('textAlign').addEventListener('change', this.renderText);
   }
 
   initTextCanvas() {
@@ -81,18 +95,37 @@ class TextControls extends HTMLElement {
     const font = document.getElementById('fontSelect').value;
     const color = document.getElementById('textColor').value;
     const size = document.getElementById('fontSize').value;
+    const align = document.getElementById('textAlign').value;
     
     // Set styling
     textCtx.fillStyle = color;
-    textCtx.textAlign = 'center';
+    textCtx.textAlign = 'center'; // Default center alignment
+    
+    // Calculate x position based on alignment
+    let x = textCanvas.width / 2; // Default center
+    if (align.endsWith('-left')) {
+        x = 30; // Left padding
+        textCtx.textAlign = 'left';
+    } else if (align.endsWith('-right')) {
+        x = textCanvas.width - 30; // Right padding
+        textCtx.textAlign = 'right';
+    }
+    
+    // Calculate y position based on alignment
+    let y = textCanvas.height / 6; // Default top
+    if (align.startsWith('center')) {
+        y = textCanvas.height / 2;
+    } else if (align.startsWith('bottom')) {
+        y = textCanvas.height - 70; // Bottom padding
+    }
     
     // Render song title
     textCtx.font = `bold ${size}px ${font}`;
-    textCtx.fillText(songTitle, textCanvas.width / 2, textCanvas.height / 6);
+    textCtx.fillText(songTitle, x, y);
     
-    // Render artist name
+    // Render artist name below title
     textCtx.font = `${size * 0.6}px ${font}`;
-    textCtx.fillText(artistName, textCanvas.width / 2, (textCanvas.height / 6) + size * 1.2);
+    textCtx.fillText(artistName, x, y + size * 1.2);
   }
 }
 

@@ -34,8 +34,7 @@ async function handleFileDrop(e) {
         const reader = new FileReader();
         reader.onload = (e) => {
             const imageUrl = e.target.result;
-            document.getElementById('bgImage').value = imageUrl;
-            document.querySelector('color-controls').updateColors();
+            document.querySelector('background-controls').updateBackground(imageUrl);
         };
         reader.readAsDataURL(file);
         return;
@@ -121,39 +120,62 @@ function exportWaveformWithProgress() {
         if (bgImageUrl) {
             const bgImage = new Image();
             bgImage.src = bgImageUrl;
-            // Draw the image scaled to the output dimensions.
-            ctx.drawImage(bgImage, 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+
+            // Calculate dimensions to maintain aspect ratio and cover full area
+            const imageAspect = bgImage.width / bgImage.height;
+            const canvasAspect = OUTPUT_WIDTH / OUTPUT_HEIGHT;
+            
+            let renderWidth = OUTPUT_WIDTH;
+            let renderHeight = OUTPUT_HEIGHT;
+            let offsetX = 0;
+            let offsetY = 0;
+            
+            if (imageAspect > canvasAspect) {
+                // Image is wider - scale to height
+                renderWidth = OUTPUT_HEIGHT * imageAspect;
+                offsetX = (OUTPUT_WIDTH - renderWidth) / 2;
+            } else {
+                // Image is taller - scale to width
+                renderHeight = OUTPUT_WIDTH / imageAspect;
+                offsetY = (OUTPUT_HEIGHT - renderHeight) / 2;
+            }
+            
+            ctx.drawImage(bgImage, offsetX, offsetY, renderWidth, renderHeight);
         }
 
-        // Draw gradient overlay (from transparent to 50% black) over the whole canvas.
-        const gradient = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT);
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+        if (document.getElementById('shadowEnabled').checked) {
+            // Draw gradient overlay (from transparent to 50% black) over the whole canvas.
+            const gradient = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+        }
 
-        // Draw the waveform canvas
-        ctx.drawImage(
-            waveformCanvas,
-            0, 0, waveformCanvas.width, waveformCanvas.height,
-            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
-        );
+        if (document.getElementById('waveformEnabled').checked) {
+            // Draw the waveform canvas
+            ctx.drawImage(
+                waveformCanvas,
+                0, 0, waveformCanvas.width, waveformCanvas.height,
+                0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
+            );
 
-        // Calculate the playhead position based on current time progress.
-        const progress = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
-        const playheadX = progress * OUTPUT_WIDTH;
+            // Calculate the playhead position based on current time progress.
+            const progress = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
+            const playheadX = progress * OUTPUT_WIDTH;
 
-        // Draw the progress overlay: clip to the played portion and scale the progress canvas.
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, playheadX, OUTPUT_HEIGHT);
-        ctx.clip();
-        ctx.drawImage(
-            progressCanvas,
-            0, 0, progressCanvas.width, progressCanvas.height,
-            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
-        );
-        ctx.restore();
+            // Draw the progress overlay: clip to the played portion and scale the progress canvas.
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, playheadX, OUTPUT_HEIGHT);
+            ctx.clip();
+            ctx.drawImage(
+                progressCanvas,
+                0, 0, progressCanvas.width, progressCanvas.height,
+                0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
+            );
+            ctx.restore();
+        }
 
         // Draw the text overlay
         if (textCanvas) {
@@ -163,7 +185,7 @@ function exportWaveformWithProgress() {
                 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
             );
         }
-        
+
         const imageURL = clonedCanvas.toDataURL('image/png');
         resolve(imageURL);
     });
@@ -227,7 +249,6 @@ async function generateVideo() {
     } catch (error) {
         alert('Error generating video: ' + error.message);
     } finally {
-        progressText.remove();
         renderBtn.disabled = false;
         renderBtn.textContent = 'Render Video';
         wavesurfer.seekTo(0);

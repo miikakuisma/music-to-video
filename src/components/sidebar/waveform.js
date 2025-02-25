@@ -1,6 +1,7 @@
 class WaveformControls extends HTMLElement {
   constructor() {
     super();
+    this.enabled = true;
   }
   
   connectedCallback() {
@@ -15,18 +16,18 @@ class WaveformControls extends HTMLElement {
          <div class="flex justify-between align-center">
           <div class="form-group w-full mr-2 flex justify-between items-center">
             <label class="toggle-label">Enabled</label>
-            <input type="checkbox" id="waveformEnabled" class="toggle-switch" checked>
+            <input type="checkbox" id="waveformEnabled" class="toggle-switch" ${this.enabled ? 'checked' : ''}>
           </div>
         </div>
 
         <div class="flex justify-between align-center">
-          <div class="form-group w-1/2 mr-2">
+          <div class="form-group w-1/2 mr-1">
             <label class="form-label">Wave Color</label>
             <div class="flex items-center gap-2">
               <input type="color" id="waveformColor" value="#999999" class="color-input">
             </div>
           </div>
-          <div class="form-group w-1/2 ml-2">
+          <div class="form-group w-1/2 ml-1">
             <label class="form-label">Progress Color</label>
             <div class="flex items-center gap-2">
               <input type="color" id="progressColor" value="#ffffff" class="color-input">
@@ -70,6 +71,15 @@ class WaveformControls extends HTMLElement {
       </details>
     `;
 
+    document.getElementById('waveformEnabled').addEventListener('change', () => {
+      this.enabled = !this.enabled
+      if (this.enabled) {
+        document.querySelector('#waveform').style.display = 'block';
+      } else {
+        document.querySelector('#waveform').style.display = 'none';
+      }
+    })
+
     document.getElementById('waveformColor').addEventListener('input', this.updateWaveform);
     document.getElementById('progressColor').addEventListener('input', this.updateWaveform);
     document.getElementById('barWidth').addEventListener('input', this.updateWaveform);
@@ -80,6 +90,7 @@ class WaveformControls extends HTMLElement {
     setTimeout(() => {
       this.updateWaveform();
     }, 500);
+    
   }
 
   updateWaveform() {
