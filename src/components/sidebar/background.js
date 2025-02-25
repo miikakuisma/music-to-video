@@ -2,6 +2,7 @@ class BackgroundControls extends HTMLElement {
   constructor() {
     super();
     this.shadowOverLay = true;
+    this.backgroundImage = null;
   }
   
   connectedCallback() {

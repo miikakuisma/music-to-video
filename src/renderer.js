@@ -35,6 +35,7 @@ async function handleFileDrop(e) {
         reader.onload = (e) => {
             const imageUrl = e.target.result;
             document.querySelector('background-controls').updateBackground(imageUrl);
+            document.querySelector('background-controls').backgroundImage = imageUrl;
         };
         reader.readAsDataURL(file);
         return;
@@ -116,7 +117,7 @@ function exportWaveformWithProgress() {
         ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
         // Draw background image if provided, scaling it to fill the canvas.
-        const bgImageUrl = document.getElementById('bgImage').value;
+        const bgImageUrl = document.querySelector('background-controls').backgroundImage
         if (bgImageUrl) {
             const bgImage = new Image();
             bgImage.src = bgImageUrl;
@@ -244,11 +245,15 @@ async function generateVideo() {
             frames,
             audioPath: document.querySelector('wave-surfer').audiofile.path,
             frameInterval
-        });        
-        alert(`Video generated successfully!\nSaved to: ${outputPath}`);
+        });
+        progressText.innerText = `Video saved to: ${outputPath}`;
+        // alert(`Video generated successfully!\nSaved to: ${outputPath}`);
     } catch (error) {
         alert('Error generating video: ' + error.message);
     } finally {
+        setTimeout(() => {
+            progressText.innerText = '';
+        }, 3000);
         renderBtn.disabled = false;
         renderBtn.textContent = 'Render Video';
         wavesurfer.seekTo(0);
