@@ -155,10 +155,11 @@ function exportWaveformWithProgress() {
 
       if (document.getElementById('waveformEnabled').checked) {
         // Draw the waveform canvas
+        const waveHeight = document.getElementById('waveHeight').value;
         ctx.drawImage(
           waveformCanvas,
           0, 0, waveformCanvas.width, waveformCanvas.height,
-          0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
+          0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / waveHeight), OUTPUT_WIDTH, OUTPUT_HEIGHT / waveHeight
         );
 
         // Calculate the playhead position based on current time progress.
@@ -173,7 +174,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
           progressCanvas,
           0, 0, progressCanvas.width, progressCanvas.height,
-          0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
+          0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / waveHeight), OUTPUT_WIDTH, OUTPUT_HEIGHT / waveHeight
         );
         ctx.restore();
       }

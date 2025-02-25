@@ -20,6 +20,17 @@ class WaveformControls extends HTMLElement {
           </div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label">Height</label>
+          <select id="waveHeight" class="form-input">
+            <option value="1.5">75%</option>
+            <option value="2" selected>50%</option>
+            <option value="3">33%</option>
+            <option value="4">25%</option>
+            <option value="5">20%</option>
+          </select>
+        </div>
+
         <div class="flex justify-between align-center">
           <div class="form-group w-1/2 mr-1">
             <label class="form-label">Wave Color</label>
@@ -70,6 +81,19 @@ class WaveformControls extends HTMLElement {
         </div>
       </details>
     `;
+
+    document.getElementById('waveHeight').addEventListener('change', () => {
+      const canvasHeight = document.querySelector('wave-surfer').height;
+      const heightDivider = document.getElementById('waveHeight').value;
+      try {
+        const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+        wavesurfer.setOptions({
+          height: canvasHeight / parseFloat(heightDivider)
+        });
+      } catch (error) {
+        console.error('Error setting waveform options:', error);
+      }
+    });
 
     document.getElementById('waveformEnabled').addEventListener('change', () => {
       this.enabled = !this.enabled
