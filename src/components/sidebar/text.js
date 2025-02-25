@@ -52,6 +52,21 @@ class TextControls extends HTMLElement {
             <option value="bottom-right">Bottom Right</option>
           </select>
         </div>
+
+        <div class="flex justify-between align-center mt-4 pr-10">
+          <div class="form-group">
+            <label class="form-label">X Offset</label>
+            <div class="flex items-center">
+              <input type="range" id="textOffsetX" min="-100" max="100" value="0" class="form-range">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Y Offset</label>
+            <div class="flex items-center">
+              <input type="range" id="textOffsetY" min="-100" max="100" value="0" class="form-range">
+            </div>
+          </div>
+        </div>
       </details>
     `;
 
@@ -61,6 +76,8 @@ class TextControls extends HTMLElement {
     document.getElementById('textColor').addEventListener('input', this.renderText);
     document.getElementById('fontSize').addEventListener('input', this.renderText);
     document.getElementById('textAlign').addEventListener('change', this.renderText);
+    document.getElementById('textOffsetX').addEventListener('input', this.renderText);
+    document.getElementById('textOffsetY').addEventListener('input', this.renderText);
   }
 
   initTextCanvas() {
@@ -104,20 +121,24 @@ class TextControls extends HTMLElement {
     // Calculate x position based on alignment
     let x = textCanvas.width / 2; // Default center
     if (align.endsWith('-left')) {
-        x = 30; // Left padding
-        textCtx.textAlign = 'left';
+      x = 30; // Left padding
+      textCtx.textAlign = 'left';
     } else if (align.endsWith('-right')) {
-        x = textCanvas.width - 30; // Right padding
-        textCtx.textAlign = 'right';
+      x = textCanvas.width - 30; // Right padding
+      textCtx.textAlign = 'right';
     }
     
     // Calculate y position based on alignment
     let y = textCanvas.height / 6; // Default top
     if (align.startsWith('center')) {
-        y = textCanvas.height / 2;
+      y = textCanvas.height / 2;
     } else if (align.startsWith('bottom')) {
-        y = textCanvas.height - 70; // Bottom padding
+      y = textCanvas.height - 70; // Bottom padding
     }
+
+    // Apply offsets
+    x += parseInt(document.getElementById('textOffsetX').value);
+    y += parseInt(document.getElementById('textOffsetY').value);
     
     // Render song title
     textCtx.font = `bold ${size}px ${font}`;
