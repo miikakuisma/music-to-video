@@ -6,21 +6,25 @@
     <link rel="stylesheet" href="src/components/canvas.css">
     <script src="src/wavesurfer.min.js"></script>
     <script src="src/components/canvas.js"></script>
-    <script src="src/components/text-controls.js"></script>
-    <script src="src/components/color-controls.js"></script>
+    <script src="src/components/sidebar/index.js" type="module"></script>
     <script src="src/renderer.js"></script>
 </head>
 <body>
     <div class="container flex flex-row w-full h-screen max-w-none">
-        <div class="left drop-zone flex justify-center items-center w-[calc(100%-300px)] h-full bg-gray-900">
+        <div class="left drop-zone flex justify-center items-center w-[calc(100%-300px)] h-full bg-gray-900 relative">
             <div class="preview bg-black p-4 rounded-lg relative">
                 <wave-surfer></wave-surfer>
                 <div class="progress-text absolute bottom-0 left-1/2 -translate-x-1/2 text-sm text-gray-500 translate-y-6"></div>
+                <div class="progress-bar absolute bottom-0 left-0 w-full h-1 bg-gray-700 rounded-full"></div>
+                <div class="progress-bar-fill absolute bottom-0 left-0 w-0 h-1 bg-gray-500 rounded-full"></div>
+                <div class="time-display absolute translate-y-8 text-sm text-gray-500">0:00</div>
+            </div>
+            <div class="play-pause-btn absolute bottom-20 left-1/2 -translate-x-1/2 text-sm text-gray-500 translate-y-6">
+                <button play class="text-sm text-gray-500 mb-2">Play</button>
             </div>
         </div>
         <div class="right w-[300px] h-full flex z-99 p-0 flex-col justify-start items-center bg-gray-800 border-l-2 border-gray-700 overflow-y-auto overflow-x-hidden">
-            <text-controls></text-controls>
-            <color-controls></color-controls>
+            <side-bar></side-bar>
         </div>
     </div>
 </body>

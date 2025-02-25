@@ -136,7 +136,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
             waveformCanvas,
             0, 0, waveformCanvas.width, waveformCanvas.height,
-            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 1.5), OUTPUT_WIDTH, OUTPUT_HEIGHT / 1.5
+            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
         );
 
         // Calculate the playhead position based on current time progress.
@@ -151,7 +151,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
             progressCanvas,
             0, 0, progressCanvas.width, progressCanvas.height,
-            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 1.5), OUTPUT_WIDTH, OUTPUT_HEIGHT / 1.5
+            0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / 2), OUTPUT_WIDTH, OUTPUT_HEIGHT / 2
         );
         ctx.restore();
 

@@ -35,7 +35,7 @@ class WaveSurferCanvas extends HTMLElement {
       waveColor: document.getElementById('waveformColor').value,
       progressColor: document.getElementById('progressColor').value,
       width: this.width,
-      height: this.height / 1.5,
+      height: this.height / 2,
       // barHeight: 1,
       cursorWidth: 0,
       barWidth: parseInt(document.getElementById('barWidth').value) || 4,
@@ -55,7 +55,30 @@ class WaveSurferCanvas extends HTMLElement {
       // Get canvas elements once after wavesurfer is ready
       this.waveformCanvas = this.wavesurfer.renderer.canvasWrapper.querySelector('canvas');
       this.progressCanvas = this.wavesurfer.renderer.progressWrapper.querySelector('canvas');
-      document.querySelector('color-controls').updateColors();
+      document.querySelector('background-controls').updateBackground();
+      document.querySelector('waveform-controls').updateWaveform();
+      document.querySelector('text-controls').renderText();
+      document.querySelector('video-controls').updateVideo();
+
+      // Set up play/pause button
+      document.querySelector('button[play]').addEventListener('click', () => {
+        this.wavesurfer.playPause();
+        if (this.wavesurfer.isPlaying()) {
+          document.querySelector('button[play]').textContent = 'Pause';
+        } else {
+          document.querySelector('button[play]').textContent = 'Play';
+        }
+      });
+      // Set up progress bar
+      this.wavesurfer.on('timeupdate', (seconds) => {
+        console.log('seconds', seconds);
+        const progress = (seconds / this.wavesurfer.getDuration()) * 100;
+        document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        document.querySelector('.time-display').textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+      });
     });
 
     // Add error handling for WaveSurfer initialization
@@ -70,8 +93,10 @@ class WaveSurferCanvas extends HTMLElement {
     this.wavesurfer.loadBlob(file);
     this.wavesurfer.on('ready', () => {
       setTimeout(() => {
+        document.querySelector('background-controls').updateBackground();
+        document.querySelector('waveform-controls').updateWaveform();
         document.querySelector('text-controls').renderText();
-        document.querySelector('color-controls').updateColors();
+        document.querySelector('video-controls').updateVideo();
       }, 0);
     });
   }

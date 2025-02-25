@@ -8,6 +8,19 @@ body {
   font-family: Arial, sans-serif;
 }
 
+div, details {
+  user-select: none;
+}
+
+details {
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+summary {
+  padding-bottom: 5px;
+}
+
 color-controls {
   width: 100%;
 }
@@ -20,12 +33,20 @@ color-controls {
   @apply block text-sm font-medium text-gray-300 mb-1;
 }
 
+.toggle-label {
+  @apply block text-sm font-medium text-gray-300 mb-0;
+}
+
 .form-group {
   @apply mb-4;
 }
 
 .color-input {
   @apply w-10 h-10 min-w-10 min-h-10 max-h-10 rounded cursor-pointer border-2 border-gray-600 focus:outline-none focus:border-blue-500;
+}
+
+.toggle-switch {
+  @apply w-5 h-5 min-w-5 min-h-5 max-h-5 rounded cursor-pointer border-2 border-gray-600 focus:outline-none focus:border-blue-500;
 }
 
 .btn-primary {

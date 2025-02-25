@@ -18,32 +18,28 @@ class TextControls extends HTMLElement {
   render() {
     console.log('text-controls: render');
     this.innerHTML = `
-      <div class="p-6">
-        <div class="space-y-6">
-          <details open>
-            <summary class="mb-2 text-sm text-gray-500">Text</summary>
-            <div class="form-group">
-              <input type="text" id="songTitleInput" placeholder="Song Title" class="form-input">
-            </div>
-          
-            <div class="form-group">
-              <input type="text" id="artistNameInput" placeholder="Artist Name" class="form-input">
-            </div>
-            
-            <div class="flex gap-2 items-center">
-              <select id="fontSelect" class="form-input flex-grow">
-                <option value="Arial">Arial</option>
-                <option value="Helvetica">Helvetica</option>
-                <option value="Times New Roman">Times New Roman</option>
-              </select>
-              <input type="number" id="fontSize" value="30" min="12" max="128" 
-                class="form-input w-20">
-                <input type="color" id="textColor" value="#ffffff" class="color-input">
-              </div>
-            </div>
-          </details>
+      <details open>
+        <summary class="mb-2 text-sm text-gray-500">Text</summary>
+        <div class="form-group">
+          <input type="text" id="songTitleInput" placeholder="Song Title" class="form-input">
         </div>
-      </div>
+      
+        <div class="form-group">
+          <input type="text" id="artistNameInput" placeholder="Artist Name" class="form-input">
+        </div>
+        
+        <div class="flex gap-2 items-center">
+          <select id="fontSelect" class="form-input flex-grow">
+            <option value="Arial">Arial</option>
+            <option value="Helvetica">Helvetica</option>
+            <option value="Times New Roman">Times New Roman</option>
+          </select>
+          <input type="number" id="fontSize" value="30" min="12" max="128" 
+            class="form-input w-20">
+            <input type="color" id="textColor" value="#ffffff" class="color-input">
+          </div>
+        </div>
+      </details>
     `;
 
     document.getElementById('songTitleInput').addEventListener('input', this.renderText);
@@ -54,7 +50,6 @@ class TextControls extends HTMLElement {
   }
 
   initTextCanvas() {
-    console.log('text-controls: initTextCanvas');
     textCanvas = document.getElementById('textOverlay');
     textCtx = textCanvas.getContext('2d');
     
@@ -67,7 +62,6 @@ class TextControls extends HTMLElement {
   }
 
   renderText() {
-    console.log('text-controls: renderText');
     // Retrieve the canvas element by its ID (as defined in your WaveSurferCanvas markup)
     const textCanvas = document.getElementById('textOverlay');
     if (!textCanvas) {
