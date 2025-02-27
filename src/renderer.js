@@ -42,7 +42,8 @@ async function handleFileDrop(e) {
   }
   
   // Handle audio files (existing code)
-  if (file && (file.type === 'audio/mpeg' || file.type === 'audio/wav')) {
+  console.log('file', file.type);
+  if (file && (file.type.startsWith('audio/'))) {
     document.querySelector('wave-surfer').audiofile = file;
     document.getElementById('renderBtn').disabled = false;
 
