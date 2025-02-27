@@ -1,3 +1,7 @@
+// Add these imports at the top of renderer.js
+const fs = require('fs');
+const path = require('path');
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
@@ -372,5 +376,118 @@ async function generateVideo() {
     
     // Reset playback position
     wavesurfer.seekTo(0);
+  }
+}
+
+// Add these event listeners at the end of the file
+require('electron').ipcRenderer.on('load-audio-file', async (event, filePath) => {
+  try {
+    // Create a File object from the file path
+    const stats = await fs.promises.stat(filePath);
+    const fileBuffer = await fs.promises.readFile(filePath);
+    
+    // Get the file type
+    const fileType = path.extname(filePath).toLowerCase().substring(1);
+    
+    // Create a File-like object
+    const file = new File([fileBuffer], path.basename(filePath), {
+      type: `audio/${fileType}`
+    });
+    
+    // Pass the file to the existing handling code
+    document.querySelector('wave-surfer').audiofile = file;
+    document.getElementById('renderBtn').disabled = false;
+
+    document.querySelector('.spinner').classList.remove('hidden');
+    document.querySelector('.spinner').classList.add('flex');
+    document.querySelector('.progress-text').innerText = 'Loading audio..';
+
+    await document.querySelector('wave-surfer').loadFile(file);
+    
+    // Process metadata similar to handleFileDrop
+    processAudioMetadata(file, filePath);
+    
+    document.querySelector('.spinner').classList.remove('flex');
+    document.querySelector('.spinner').classList.add('hidden');
+    document.querySelector('text-controls').renderText();
+    document.querySelector('.progress-text').innerText = '';
+    document.querySelector('button[play]').disabled = false;
+  } catch (error) {
+    console.error('Error loading audio file:', error);
+    alert(`Error loading audio file: ${error.message}`);
+  }
+});
+
+require('electron').ipcRenderer.on('load-image-file', async (event, filePath) => {
+  try {
+    // Read the image file
+    const fileBuffer = await fs.promises.readFile(filePath);
+    
+    // Convert to data URL
+    const base64data = fileBuffer.toString('base64');
+    const fileType = path.extname(filePath).toLowerCase().substring(1);
+    const imageUrl = `data:image/${fileType};base64,${base64data}`;
+    
+    // Update the background
+    document.querySelector('background-controls').updateBackground(imageUrl);
+    document.querySelector('background-controls').backgroundImage = imageUrl;
+  } catch (error) {
+    console.error('Error loading image file:', error);
+    alert(`Error loading image file: ${error.message}`);
+  }
+});
+
+// Add a helper function to process audio metadata
+async function processAudioMetadata(file, filePath) {
+  if (file.type === 'audio/mpeg') {
+    try {
+      document.querySelector('.progress-text').innerText = 'Reading ID3 tags..';
+      
+      // Use CommonJS require
+      const { parseBuffer } = require('music-metadata');
+      
+      // Convert File to Buffer
+      const buffer = await file.arrayBuffer();
+      const metadata = await parseBuffer(
+        Buffer.from(buffer),
+        { mimeType: file.type }
+      );
+      
+      console.log('Metadata:', metadata);
+      
+      // Update the input fields with the metadata
+      if (metadata.common.title) {
+        document.getElementById('songTitleInput').value = metadata.common.title;
+      }
+      if (metadata.common.artist) {
+        document.getElementById('artistNameInput').value = metadata.common.artist;
+      }
+      // Load image from metadata
+      if (metadata.common.picture) {
+        const pictureData = metadata.common.picture[0].data;
+        const pictureFormat = metadata.common.picture[0].format;
+        const blob = new Blob([pictureData], { type: pictureFormat });
+        const imageUrl = URL.createObjectURL(blob);
+        document.querySelector('background-controls').updateBackground(imageUrl);
+        document.querySelector('background-controls').backgroundImage = imageUrl;
+      }
+    } catch (error) {
+      console.error('Error reading metadata:', error);
+      // Fallback to filename if metadata reading fails
+      const filename = path.basename(filePath).replace(/\.[^/.]+$/, '');
+      document.getElementById('songTitleInput').value = filename;
+      document.getElementById('artistNameInput').value = '';
+    }
+  } else {
+    // Parse WAV filename (Artist - Song)
+    const filename = path.basename(filePath).replace(/\.[^/.]+$/, ''); // Remove extension
+    const parts = filename.split('-').map(part => part.trim());
+    if (parts.length === 2) {
+      document.getElementById('artistNameInput').value = parts[0];
+      document.getElementById('songTitleInput').value = parts[1];
+    } else {
+      document.getElementById('songTitleInput').value = filename;
+      document.getElementById('artistNameInput').value = '';
+    }
   }
 }

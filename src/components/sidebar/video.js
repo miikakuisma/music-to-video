@@ -9,7 +9,7 @@ class VideoControls extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <details>
+      <details open>
         <summary class="mb-2 text-sm text-gray-500">Video options</summary>
         <div class="form-group">
           <label class="form-label" for="sizeMenu">Size</label>
@@ -26,7 +26,7 @@ class VideoControls extends HTMLElement {
 
       <div class="fixed bottom-0 right-0 p-4 w-[300px] flex justify-center items-center bg-gray-800 border-t-2 border-gray-700">
         <button id="renderBtn" disabled class="btn-primary">
-          Render Video
+          Export Video
         </button>
       </div>
     `;

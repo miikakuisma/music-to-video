@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
@@ -8,10 +8,135 @@ const { spawn } = require('child_process');
 // Set the ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+// Set the application name
+app.name = 'Wave Render';
+
+// Modify the menu creation function to handle platform differences
+function createApplicationMenu(mainWindow) {
+  // Create the template with platform-specific considerations
+  const template = [];
+  
+  // On macOS, the first menu is the application menu
+  if (process.platform === 'darwin') {
+    template.push({
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    });
+  }
+  
+  // Add the File menu (which will be the first menu on Windows/Linux)
+  template.push({
+    label: 'File',
+    submenu: [
+      {
+        label: 'Load Audio',
+        accelerator: 'CmdOrCtrl+O',
+        click: async () => {
+          const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openFile'],
+            filters: [
+              { name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'] }
+            ]
+          });
+          if (!canceled && filePaths.length > 0) {
+            mainWindow.webContents.send('load-audio-file', filePaths[0]);
+          }
+        }
+      },
+      {
+        label: 'Load Image',
+        accelerator: 'CmdOrCtrl+I',
+        click: async () => {
+          const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openFile'],
+            filters: [
+              { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }
+            ]
+          });
+          if (!canceled && filePaths.length > 0) {
+            mainWindow.webContents.send('load-image-file', filePaths[0]);
+          }
+        }
+      },
+      // Add exit but not on macOS (as it's in the app menu)
+      ...(process.platform !== 'darwin' ? [
+        { type: 'separator' },
+        {
+          label: 'Exit',
+          accelerator: 'Alt+F4',
+          click: () => app.quit()
+        }
+      ] : [])
+    ]
+  });
+  
+  // Add the remaining menus
+  template.push(
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    }
+  );
+  
+  // Add Help menu
+  template.push({
+    label: 'Help',
+    submenu: [
+      {
+        label: 'About Wave Render',
+        // Don't include on macOS as it's in the app menu
+        visible: process.platform !== 'darwin',
+        click: async () => {
+          dialog.showMessageBox(mainWindow, {
+            title: 'About Wave Render',
+            message: 'Wave Render',
+            detail: 'A tool for creating waveform videos from audio files.\nVersion 1.0.0'
+          });
+        }
+      }
+    ]
+  });
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    title: 'Wave Render',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -19,6 +144,9 @@ function createWindow() {
   });
   mainWindow.maximize();
   mainWindow.loadFile('index.html');
+  
+  // Create the application menu
+  createApplicationMenu(mainWindow);
 }
 
 app.whenReady().then(createWindow);

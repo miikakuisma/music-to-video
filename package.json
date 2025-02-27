@@ -1,5 +1,6 @@
 {
   "name": "wave-render",
+  "productName": "Wave Render",
   "version": "1.0.0",
   "description": "Render audio to video",
   "main": "main.js",
@@ -26,7 +27,6 @@
   },
   "build": {
     "appId": "dev.tatami.waverender",
-    "productName": "Wave Render",
     "files": [
       "main.js",
       "index.html",
