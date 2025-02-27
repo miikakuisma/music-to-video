@@ -178,12 +178,26 @@ function exportWaveformWithProgress() {
       }
 
       if (document.getElementById('waveformEnabled').checked) {
-        // Draw the waveform canvas
-        const waveHeight = document.getElementById('waveHeight').value;
+        // Get waveform settings for proper positioning
+        const waveHeight = parseFloat(document.getElementById('waveHeight').value) || 2.0;
+        const waveVerticalPosition = document.getElementById('wavePosition').value || 'bottom';
+        
+        // Calculate waveform position and scale
+        let waveY = 0;
+        const waveHeightPx = OUTPUT_HEIGHT / waveHeight;
+        
+        if (waveVerticalPosition === 'bottom') {
+          waveY = OUTPUT_HEIGHT - waveHeightPx;
+        } else if (waveVerticalPosition === 'middle') {
+          waveY = (OUTPUT_HEIGHT - waveHeightPx) / 2;
+        }
+        // For 'top', waveY remains 0
+        
+        // Draw the waveform canvas at the correct position and size
         ctx.drawImage(
           waveformCanvas,
           0, 0, waveformCanvas.width, waveformCanvas.height,
-          0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / waveHeight), OUTPUT_WIDTH, OUTPUT_HEIGHT / waveHeight
+          0, waveY, OUTPUT_WIDTH, waveHeightPx
         );
 
         // Calculate the playhead position based on current time progress.
@@ -198,7 +212,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
           progressCanvas,
           0, 0, progressCanvas.width, progressCanvas.height,
-          0, OUTPUT_HEIGHT - (OUTPUT_HEIGHT / waveHeight), OUTPUT_WIDTH, OUTPUT_HEIGHT / waveHeight
+          0, waveY, OUTPUT_WIDTH, waveHeightPx
         );
         ctx.restore();
       }
@@ -217,70 +231,146 @@ function exportWaveformWithProgress() {
     });
 }
 
+// Add this function to update the waveform when the output size changes
+function updateWaveformForOutputSize() {
+  const wsElement = document.querySelector('wave-surfer');
+  const videoWidth = wsElement.width;
+  const videoHeight = wsElement.height;
+  
+  // Get current settings
+  const wavesurfer = wsElement.wavesurfer;
+  if (!wavesurfer) return;
+  
+  // Update wavesurfer dimensions
+  try {
+    // Get waveform height factor
+    const heightValue = document.getElementById('waveHeight').value;
+    const heightFactor = parseFloat(heightValue) || 2.0;
+    
+    // Set new dimensions
+    wavesurfer.setOptions({
+      width: videoWidth,
+      height: videoHeight / heightFactor
+    });
+    
+    // Update canvas references after resize
+    setTimeout(() => {
+      wsElement.waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
+      wsElement.progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
+    }, 100);
+    
+    // Re-render text on new dimensions
+    setTimeout(() => {
+      document.querySelector('text-controls').renderText();
+    }, 200);
+  } catch (error) {
+    console.error('Error updating wavesurfer dimensions:', error);
+  }
+}
+
+// Replace the existing generateVideo function with this batch-based approach
 async function generateVideo() {
   const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
   const renderBtn = document.getElementById('renderBtn');
   renderBtn.disabled = true;
   renderBtn.textContent = 'Generating...';
-
-  const duration = wavesurfer.getDuration();
-  const frames = [];
   
-  // Get video width from wavesurfer
-  const videoWidth = wavesurfer.width || 640; // fallback to 640 if not set
+  // Show spinner
+  document.querySelector('.spinner').classList.remove('hidden');
+  document.querySelector('.spinner').classList.add('flex');
   
-  // Calculate frame count based on video width
-  // Never generate more frames than pixels we have
-  const frameCount = Math.min(videoWidth, Math.ceil(duration));
-  const frameInterval = duration / frameCount;
-
-  // Show progress
   const progressText = document.querySelector('.progress-text');
-
-  // Generate frames for the video
-  for (let i = 0; i < frameCount; i++) {
-    const progress = (i * frameInterval) / duration;
-    
-    // Update progress text
-    progressText.textContent = `Generating frame ${i + 1}/${frameCount}`;
-    
-    await new Promise(resolve => {
-      wavesurfer.seekTo(progress);
-      wavesurfer.on('timeupdate', resolve);
-    });
-    
-    await new Promise(resolve => setTimeout(resolve, 20));
-    
-    try {
-      const imageData = await exportWaveformWithProgress();
-      frames.push(imageData.toString()); // Convert to string immediately to save memory
-    } catch (err) {
-      console.error('Error exporting frame:', err);
-      alert('Error generating video frames. Please try again.');
-      renderBtn.disabled = false;
-      renderBtn.textContent = 'Render Video';
-      return;
-    }
-  }
-
-  progressText.textContent = 'Encoding video...';
-
+  progressText.textContent = 'Preparing to render...';
+  
   try {
-    const outputPath = await require('electron').ipcRenderer.invoke('generate-video', {
-      frames,
+    const duration = wavesurfer.getDuration();
+    const videoWidth = document.querySelector('wave-surfer').width;
+    
+    // Calculate optimal frame parameters
+    // Limit frames to video width (no point in having more)
+    const frameCount = Math.min(videoWidth, 1920);
+    const fps = Math.min(30, frameCount / duration);
+    
+    // Start batch rendering
+    const batchResult = await require('electron').ipcRenderer.invoke('start-batch-render', {
       audioPath: document.querySelector('wave-surfer').audiofile.path,
-      frameInterval
+      fps,
+      frameCount
     });
-    progressText.innerText = `Video saved to: ${outputPath}`;
-    // alert(`Video generated successfully!\nSaved to: ${outputPath}`);
-  } catch (error) {
-      alert('Error generating video: ' + error.message);
-  } finally {
+    
+    if (!batchResult.success) {
+      throw new Error(`Failed to start rendering: ${batchResult.error}`);
+    }
+    
+    const batchSize = batchResult.batchSize || 100;
+    let currentBatch = [];
+    
+    // Generate frames in batches
+    for (let i = 0; i < frameCount; i++) {
+      // Update progress text
+      if (i % 10 === 0 || i === frameCount - 1) {
+        progressText.textContent = `Rendering frame ${i+1}/${frameCount}`;
+      }
+      
+      // Set waveform position
+      const progress = i / frameCount;
+      wavesurfer.seekTo(progress);
+      
+      // Small delay to ensure waveform updates
+      await new Promise(resolve => setTimeout(resolve, 10));
+      
+      // Generate frame and add to current batch
+      const imageData = await exportWaveformWithProgress();
+      currentBatch.push(imageData);
+      
+      // Process batch when it reaches batch size or is the last frame
+      if (currentBatch.length >= batchSize || i === frameCount - 1) {
+        progressText.textContent = `Writing frames ${i-currentBatch.length+1}-${i+1}/${frameCount}`;
+        
+        const batchWriteResult = await require('electron').ipcRenderer.invoke('write-frame-batch', {
+          frames: currentBatch
+        });
+        
+        if (!batchWriteResult.success) {
+          throw new Error(`Failed to write frames: ${batchWriteResult.error}`);
+        }
+        
+        // Clear batch
+        currentBatch = [];
+      }
+    }
+    
+    // Process video once all frames are written
+    progressText.textContent = 'Processing video...';
+    const processResult = await require('electron').ipcRenderer.invoke('process-video');
+    
+    if (!processResult.success) {
+      throw new Error(`Failed to process video: ${processResult.error}`);
+    }
+    
+    progressText.textContent = `Video saved to: ${processResult.outputPath}`;
+    
+    // Clear message after delay
     setTimeout(() => {
-      progressText.innerText = '';
-    }, 3000);
+      if (progressText.textContent.includes('Video saved')) {
+        progressText.textContent = '';
+      }
+    }, 10000);
+    
+  } catch (error) {
+    console.error('Video generation error:', error);
+    progressText.textContent = `Error: ${error.message}`;
+    alert(`Error generating video: ${error.message}`);
+  } finally {
+    // Hide spinner
+    document.querySelector('.spinner').classList.remove('flex');
+    document.querySelector('.spinner').classList.add('hidden');
+    
+    // Re-enable render button
     renderBtn.disabled = false;
     renderBtn.textContent = 'Render Video';
+    
+    // Reset playback position
     wavesurfer.seekTo(0);
   }
 }

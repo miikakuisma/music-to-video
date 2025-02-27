@@ -57,6 +57,37 @@ class VideoControls extends HTMLElement {
       document.querySelector('#textOverlay').setAttribute('height', height + 'px');
 
       document.querySelector('text-controls').renderText();
+
+      // After updating the container size, explicitly update the waveform
+      setTimeout(() => {
+        // Call our new function to update the waveform for the new size
+        if (typeof window.updateWaveformForOutputSize === 'function') {
+          window.updateWaveformForOutputSize();
+        } else {
+          // Fallback direct implementation
+          const wsElement = document.querySelector('wave-surfer');
+          const wavesurfer = wsElement.wavesurfer;
+          const videoWidth = wsElement.width;
+          const videoHeight = wsElement.height;
+          const heightValue = document.getElementById('waveHeight').value;
+          
+          try {
+            wavesurfer.setOptions({
+              width: videoWidth,
+              height: videoHeight / parseFloat(heightValue || 2.0)
+            });
+            
+            // Update canvas references
+            wsElement.waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
+            wsElement.progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
+            
+            // Re-render text
+            document.querySelector('text-controls').renderText();
+          } catch (error) {
+            console.error('Error updating wavesurfer for size change:', error);
+          }
+        }
+      }, 200);
     });
 
     setTimeout(() => {

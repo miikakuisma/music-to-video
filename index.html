@@ -12,11 +12,11 @@
 <body>
     <div class="container flex flex-row w-full h-screen max-w-none">
         <div class="left drop-zone flex justify-center items-center w-[calc(100%-300px)] h-full bg-gray-900 relative">
-            <div class="preview bg-black p-4 rounded-lg relative">
+            <div class="preview bg-black pb-1 rounded-lg relative">
                 <wave-surfer></wave-surfer>
                 <div class="progress-bar absolute bottom-0 left-0 w-full h-1 bg-gray-700 rounded-full"></div>
                 <div class="progress-bar-fill absolute bottom-0 left-0 w-0 h-1 bg-gray-500 rounded-full"></div>
-                <div class="progress-handle absolute bottom-0 left-0 w-[16px] h-[16px] translate-x-[-6px] translate-y-[6px] bg-gray-500 rounded-full cursor-pointer hover:bg-gray-400"></div>
+                <div class="progress-handle absolute bottom-0 z-50 left-0 w-[16px] h-[16px] translate-x-[-6px] translate-y-[6px] bg-gray-500 rounded-full cursor-pointer hover:bg-gray-400"></div>
 
                 <div class="absolute bottom-0 left-0 right-0 flex justify-between items-center translate-y-8">
                     <div class="time-display text-sm text-gray-500">0:00</div>
@@ -26,7 +26,7 @@
                     </button>
                 </div>
                 
-                <div class="spinner absolute z-50 w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center backdrop-blur-lg">
+                <div class="spinner absolute z-40 w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center bg-black/80">
                     <div class="w-10 h-10 border-4 border-gray-500 border-t-gray-300 rounded-full animate-spin"></div>
                 </div>
             </div>

@@ -79,6 +79,21 @@ class WaveformControls extends HTMLElement {
             </div>
           </div>
         </div>
+
+        <div class="form-group">
+          <label class="form-label" for="waveHeight">Wave Height Scale</label>
+          <input type="range" id="waveHeight" min="1" max="5" step="0.1" value="2" class="form-input">
+          <span class="text-xs text-gray-400">Small ↔ Large</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="wavePosition">Position</label>
+          <select id="wavePosition" class="form-input">
+            <option value="bottom" selected>Bottom</option>
+            <option value="middle">Middle</option>
+            <option value="top">Top</option>
+          </select>
+        </div>
       </details>
     `;
 
