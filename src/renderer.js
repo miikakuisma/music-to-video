@@ -45,8 +45,7 @@ async function handleFileDrop(e) {
     return;
   }
   
-  // Handle audio files (existing code)
-  console.log('file', file.type);
+  // Handle audio files
   if (file && (file.type.startsWith('audio/'))) {
     document.querySelector('wave-surfer').audiofile = file;
     document.getElementById('renderBtn').disabled = false;
@@ -233,43 +232,6 @@ function exportWaveformWithProgress() {
       const imageURL = clonedCanvas.toDataURL('image/png');
       resolve(imageURL);
     });
-}
-
-// Add this function to update the waveform when the output size changes
-function updateWaveformForOutputSize() {
-  const wsElement = document.querySelector('wave-surfer');
-  const videoWidth = wsElement.width;
-  const videoHeight = wsElement.height;
-  
-  // Get current settings
-  const wavesurfer = wsElement.wavesurfer;
-  if (!wavesurfer) return;
-  
-  // Update wavesurfer dimensions
-  try {
-    // Get waveform height factor
-    const heightValue = document.getElementById('waveHeight').value;
-    const heightFactor = parseFloat(heightValue) || 2.0;
-    
-    // Set new dimensions
-    wavesurfer.setOptions({
-      width: videoWidth,
-      height: videoHeight / heightFactor
-    });
-    
-    // Update canvas references after resize
-    setTimeout(() => {
-      wsElement.waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
-      wsElement.progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
-    }, 100);
-    
-    // Re-render text on new dimensions
-    setTimeout(() => {
-      document.querySelector('text-controls').renderText();
-    }, 200);
-  } catch (error) {
-    console.error('Error updating wavesurfer dimensions:', error);
-  }
 }
 
 // Replace the existing generateVideo function with this batch-based approach
