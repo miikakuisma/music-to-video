@@ -91,9 +91,6 @@ class WaveSurferCanvas extends HTMLElement {
     // Add event listener for progress handle dragging
     document.querySelector('.progress-handle').addEventListener('mousedown', (e) => {
       e.preventDefault();
-      const currentTime = this.wavesurfer.getCurrentTime();
-      const progress = (currentTime / this.wavesurfer.getDuration()) * 100;
-      const startX = e.clientX;
       
       const handleMouseMove = (e) => {
         const canvasRect = this.wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
