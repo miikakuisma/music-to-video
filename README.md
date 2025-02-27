@@ -59,6 +59,7 @@ yarn build
 ```
 
 ## Coming up
-- Customizable video output settings
-- More ways to customize video (background images, text styles etc)
+- Vertical orientation
+- Audio processing (such as normalize)
+  
 
