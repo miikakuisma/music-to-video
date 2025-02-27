@@ -23,11 +23,12 @@ class WaveformControls extends HTMLElement {
         <div class="form-group">
           <label class="form-label">Height</label>
           <select id="waveHeight" class="form-input">
-            <option value="1.5">75%</option>
-            <option value="2" selected>50%</option>
-            <option value="3">33%</option>
-            <option value="4">25%</option>
-            <option value="5">20%</option>
+            <option value="1">100%</option>
+            <option value="0.75">75%</option>
+            <option value="0.5" selected>50%</option>
+            <option value="0.333">33%</option>
+            <option value="0.25">25%</option>
+            <option value="0.20">20%</option>
           </select>
         </div>
 
@@ -35,13 +36,13 @@ class WaveformControls extends HTMLElement {
           <div class="form-group w-1/2 mr-1">
             <label class="form-label">Wave Color</label>
             <div class="flex items-center gap-2">
-              <input type="color" id="waveformColor" value="#999999" class="color-input">
+              <input type="color" id="waveformColor" value="${timeline[0].waveformColor}" class="color-input">
             </div>
           </div>
           <div class="form-group w-1/2 ml-1">
             <label class="form-label">Progress Color</label>
             <div class="flex items-center gap-2">
-              <input type="color" id="progressColor" value="#ffffff" class="color-input">
+              <input type="color" id="progressColor" value="${timeline[0].progressColor}" class="color-input">
             </div>
           </div>
         </div>
@@ -50,13 +51,13 @@ class WaveformControls extends HTMLElement {
           <div class="form-group w-1/2 mr-2">
             <label class="form-label">Bar Width</label>
             <div class="flex items-center gap-2">
-              <input type="number" id="barWidth" value="4" class="form-input">
+              <input type="number" id="barWidth" value="${timeline[0].barWidth}" class="form-input">
             </div>
           </div>
           <div class="form-group w-1/2 ml-2">
             <label class="form-label">Bar Gap</label>
             <div class="flex items-center gap-2">
-              <input type="number" id="barGap" value="2" class="form-input">
+              <input type="number" id="barGap" value="${timeline[0].barGap}" class="form-input">
             </div>
           </div>
         </div>
@@ -65,13 +66,13 @@ class WaveformControls extends HTMLElement {
           <div class="form-group w-1/2 mr-2">
             <label class="form-label">Cursor Width</label>
             <div class="flex items-center gap-2">
-              <input type="number" id="cursorWidth" value="0" class="form-input">
+              <input type="number" id="cursorWidth" value="${timeline[0].cursorWidth}" class="form-input">
             </div>
           </div>
           <div class="form-group w-1/2 ml-2">
             <label class="form-label">Bar Align</label>
             <div class="flex items-center gap-2">
-              <select id="barAlign" class="form-input">
+              <select id="barAlign" class="form-input" value="${timeline[0].barAlign}">
                 <option value="top">Top</option>
                 <option value="center">Center</option>
                 <option value="bottom" selected>Bottom</option>
@@ -79,31 +80,16 @@ class WaveformControls extends HTMLElement {
             </div>
           </div>
         </div>
-
-        <div class="form-group">
-          <label class="form-label" for="waveHeight">Wave Height Scale</label>
-          <input type="range" id="waveHeight" min="1" max="5" step="0.1" value="2" class="form-input">
-          <span class="text-xs text-gray-400">Small ↔ Large</span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="wavePosition">Position</label>
-          <select id="wavePosition" class="form-input">
-            <option value="bottom" selected>Bottom</option>
-            <option value="middle">Middle</option>
-            <option value="top">Top</option>
-          </select>
-        </div>
       </details>
     `;
 
     document.getElementById('waveHeight').addEventListener('change', () => {
-      const canvasHeight = document.querySelector('wave-surfer').height;
       const heightDivider = document.getElementById('waveHeight').value;
       try {
         const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+        timeline[0].barHeight = parseFloat(heightDivider);
         wavesurfer.setOptions({
-          height: canvasHeight / parseFloat(heightDivider)
+          barHeight: parseFloat(heightDivider)
         });
       } catch (error) {
         console.error('Error setting waveform options:', error);
@@ -139,13 +125,24 @@ class WaveformControls extends HTMLElement {
     const barGap = document.getElementById('barGap').value;
     const cursorWidth = document.getElementById('cursorWidth').value;
     const barAlign = document.getElementById('barAlign').value;
+    const barHeight = document.getElementById('waveHeight').value;
     const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+
+    // update timeline model from input fields
+    timeline[0].waveformColor = waveformColor;
+    timeline[0].progressColor = progressColor;
+    timeline[0].barWidth = barWidth;
+    timeline[0].barHeight = barHeight;
+    timeline[0].barGap = barGap;
+    timeline[0].cursorWidth = cursorWidth;
+    timeline[0].barAlign = barAlign;
 
     try {
       wavesurfer.setOptions({
         waveColor: waveformColor,
         progressColor: progressColor,
         barWidth: barWidth,
+        barHeight: timeline[0].barHeight,
         barGap: barGap,
         cursorWidth: cursorWidth,
         barAlign: barAlign

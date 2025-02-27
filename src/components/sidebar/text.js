@@ -113,6 +113,14 @@ class TextControls extends HTMLElement {
     const color = document.getElementById('textColor').value;
     const size = document.getElementById('fontSize').value;
     const align = document.getElementById('textAlign').value;
+
+    // update timeline model from input fields
+    timeline[0].text.songTitle = songTitle;
+    timeline[0].text.artistName = artistName;
+    timeline[0].text.font = font;
+    timeline[0].text.color = color;
+    timeline[0].text.size = size;
+    timeline[0].text.align = align;
     
     // Set styling
     textCtx.fillStyle = color;

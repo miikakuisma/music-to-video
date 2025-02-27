@@ -181,33 +181,18 @@ function exportWaveformWithProgress() {
       }
 
       if (document.getElementById('waveformEnabled').checked) {
-        // Get waveform settings for proper positioning
-        const waveHeight = parseFloat(document.getElementById('waveHeight').value) || 2.0;
-        const waveVerticalPosition = document.getElementById('wavePosition').value || 'bottom';
-        
-        // Calculate waveform position and scale
-        let waveY = 0;
-        const waveHeightPx = OUTPUT_HEIGHT / waveHeight;
-        
-        if (waveVerticalPosition === 'bottom') {
-          waveY = OUTPUT_HEIGHT - waveHeightPx;
-        } else if (waveVerticalPosition === 'middle') {
-          waveY = (OUTPUT_HEIGHT - waveHeightPx) / 2;
-        }
-        // For 'top', waveY remains 0
-        
-        // Draw the waveform canvas at the correct position and size
+        // Since the waveform now always matches the canvas size, draw it across the entire canvas.
         ctx.drawImage(
           waveformCanvas,
           0, 0, waveformCanvas.width, waveformCanvas.height,
-          0, waveY, OUTPUT_WIDTH, waveHeightPx
+          0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
         );
 
         // Calculate the playhead position based on current time progress.
         const progress = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
         const playheadX = progress * OUTPUT_WIDTH;
 
-        // Draw the progress overlay: clip to the played portion and scale the progress canvas.
+        // Draw the progress overlay by clipping to the played portion over the full canvas.
         ctx.save();
         ctx.beginPath();
         ctx.rect(0, 0, playheadX, OUTPUT_HEIGHT);
@@ -215,7 +200,7 @@ function exportWaveformWithProgress() {
         ctx.drawImage(
           progressCanvas,
           0, 0, progressCanvas.width, progressCanvas.height,
-          0, waveY, OUTPUT_WIDTH, waveHeightPx
+          0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT
         );
         ctx.restore();
       }

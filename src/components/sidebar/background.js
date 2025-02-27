@@ -17,20 +17,20 @@ class BackgroundControls extends HTMLElement {
           <div class="form-group">
             <label class="form-label">Color</label>
             <div class="flex items-center gap-2">
-              <input type="color" id="bgColor" value="#111111" class="color-input">
+              <input type="color" id="bgColor" value="${timeline[0].backgroundColor}" class="color-input">
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="bgImage">Image</label>
-            <input type="text" id="bgImage" placeholder="paste URL" class="form-input">
+            <input type="text" id="bgImage" placeholder="paste URL" class="form-input" value="">
           </div>
         </div>
 
         <div class="flex justify-between align-center">
           <div class="form-group w-full mr-2 flex justify-between items-center">
             <label class="toggle-label">Shadow</label>
-            <input type="checkbox" id="shadowEnabled" class="toggle-switch" ${this.shadowOverLay === true ? 'checked' : ''}>
+            <input type="checkbox" id="shadowEnabled" class="toggle-switch" ${timeline[0].shadowEnabled === true ? 'checked' : ''}>
           </div>
         </div>
       </details>

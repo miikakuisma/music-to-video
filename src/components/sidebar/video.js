@@ -54,7 +54,7 @@ class VideoControls extends HTMLElement {
       try {
         wavesurfer.setOptions({
           width: width,
-          height: height / 2
+          height: height
         });
       } catch (error) {
         console.error('Error setting waveform options:', error);
@@ -81,12 +81,11 @@ class VideoControls extends HTMLElement {
           const wavesurfer = wsElement.wavesurfer;
           const videoWidth = wsElement.width;
           const videoHeight = wsElement.height;
-          const heightValue = document.getElementById('waveHeight').value;
           
           try {
             wavesurfer.setOptions({
               width: videoWidth,
-              height: videoHeight / parseFloat(heightValue || 2.0)
+              height: videoHeight
             });
             
             // Update canvas references
@@ -164,7 +163,7 @@ class VideoControls extends HTMLElement {
     try {
       wavesurfer.setOptions({
         width: width,
-        height: height / 2
+        height: height
       });
     } catch (error) {
       console.error('Error setting waveform options:', error);
