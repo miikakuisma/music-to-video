@@ -77,6 +77,8 @@ class WaveSurferCanvas extends HTMLElement {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
         document.querySelector('.time-display').textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+
+        document.querySelector('.progress-handle').style.left = `${progress}%`;
       });
     });
 
@@ -84,6 +86,30 @@ class WaveSurferCanvas extends HTMLElement {
     this.wavesurfer.on('error', err => {
       console.error('WaveSurfer error:', err);
       alert('Error initializing audio visualization. Please try again.');
+    });
+
+    // Add event listener for progress handle dragging
+    document.querySelector('.progress-handle').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const currentTime = this.wavesurfer.getCurrentTime();
+      const progress = (currentTime / this.wavesurfer.getDuration()) * 100;
+      const startX = e.clientX;
+      
+      const handleMouseMove = (e) => {
+        const canvasRect = this.wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
+        let relativeX = e.clientX - canvasRect.left;
+        relativeX = Math.max(0, Math.min(relativeX, canvasRect.width));
+        const newTime = (relativeX / canvasRect.width) * this.wavesurfer.getDuration();
+        this.wavesurfer.setTime(newTime);
+      };
+      
+      const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     });
   }
 
