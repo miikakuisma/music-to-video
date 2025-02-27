@@ -46,8 +46,16 @@ async function handleFileDrop(e) {
     document.querySelector('wave-surfer').audiofile = file;
     document.getElementById('renderBtn').disabled = false;
 
+    document.querySelector('.spinner').classList.remove('hidden');
+    document.querySelector('.spinner').classList.add('flex');
+    document.querySelector('.progress-text').innerText = 'Loading audio..';
+
+    await document.querySelector('wave-surfer').loadFile(file);
+
     if (file.type === 'audio/mpeg') {
       try {
+        document.querySelector('.progress-text').innerText = 'Reading ID3 tags..';
+
         // Use CommonJS require
         const { parseBuffer } = require('music-metadata');
         
@@ -66,6 +74,15 @@ async function handleFileDrop(e) {
         }
         if (metadata.common.artist) {
           document.getElementById('artistNameInput').value = metadata.common.artist;
+        }
+        // Load image from metadata
+        if (metadata.common.picture) {
+          const pictureData = metadata.common.picture[0].data;
+          const pictureFormat = metadata.common.picture[0].format;
+          const blob = new Blob([pictureData], { type: pictureFormat });
+          const imageUrl = URL.createObjectURL(blob);
+          document.querySelector('background-controls').updateBackground(imageUrl);
+          document.querySelector('background-controls').backgroundImage = imageUrl;
         }
       } catch (error) {
         console.error('Error reading metadata:', error);
@@ -87,7 +104,13 @@ async function handleFileDrop(e) {
       }
     }
 
-    document.querySelector('wave-surfer').loadFile(file);
+    document.querySelector('.spinner').classList.remove('flex');
+    document.querySelector('.spinner').classList.add('hidden');
+
+    document.querySelector('text-controls').renderText();
+    document.querySelector('.progress-text').innerText = '';
+
+    document.querySelector('button[play]').disabled = false;
   }
 }
 

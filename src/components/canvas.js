@@ -64,17 +64,16 @@ class WaveSurferCanvas extends HTMLElement {
       document.querySelector('button[play]').addEventListener('click', () => {
         this.wavesurfer.playPause();
         if (this.wavesurfer.isPlaying()) {
-          document.querySelector('button[play]').textContent = 'Pause';
+          // pause icon
+          document.querySelector('button[play]').innerHTML = '<svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect height="320" width="79" x="128" y="96"/><rect height="320" width="79" x="305" y="96"/></g></svg>';
         } else {
-          document.querySelector('button[play]').textContent = 'Play';
+          document.querySelector('button[play]').innerHTML = '<svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M128,96v320l256-160L128,96L128,96z"/></svg>';
         }
       });
       // Set up progress bar
       this.wavesurfer.on('timeupdate', (seconds) => {
-        console.log('seconds', seconds);
         const progress = (seconds / this.wavesurfer.getDuration()) * 100;
         document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
-
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
         document.querySelector('.time-display').textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -89,15 +88,22 @@ class WaveSurferCanvas extends HTMLElement {
   }
 
   loadFile(file) {
-    this.querySelector('.waveform-container').classList.add('file-loaded');
-    this.wavesurfer.loadBlob(file);
-    this.wavesurfer.on('ready', () => {
-      setTimeout(() => {
-        document.querySelector('background-controls').updateBackground();
-        document.querySelector('waveform-controls').updateWaveform();
-        document.querySelector('text-controls').renderText();
-        document.querySelector('video-controls').updateVideo();
-      }, 0);
+    return new Promise((resolve, reject) => {
+      try {
+        this.querySelector('.waveform-container').classList.add('file-loaded');
+        this.wavesurfer.loadBlob(file);
+        this.wavesurfer.on('ready', () => {
+          setTimeout(() => {
+            document.querySelector('background-controls').updateBackground();
+            document.querySelector('waveform-controls').updateWaveform();
+            document.querySelector('text-controls').renderText();
+            document.querySelector('video-controls').updateVideo();
+            resolve();
+          }, 0);
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 }

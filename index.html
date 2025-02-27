@@ -14,13 +14,20 @@
         <div class="left drop-zone flex justify-center items-center w-[calc(100%-300px)] h-full bg-gray-900 relative">
             <div class="preview bg-black p-4 rounded-lg relative">
                 <wave-surfer></wave-surfer>
-                <div class="progress-text absolute bottom-0 right-4 text-sm text-gray-500 translate-y-9"></div>
                 <div class="progress-bar absolute bottom-0 left-0 w-full h-1 bg-gray-700 rounded-full"></div>
                 <div class="progress-bar-fill absolute bottom-0 left-0 w-0 h-1 bg-gray-500 rounded-full"></div>
-                <div class="time-display absolute translate-y-8 text-sm text-gray-500">0:00</div>
-            </div>
-            <div class="play-pause-btn absolute bottom-20 left-1/2 -translate-x-1/2 text-sm text-gray-500 translate-y-6">
-                <button play class="text-sm text-gray-500 mb-2">Play</button>
+
+                <div class="absolute bottom-0 left-0 right-0 flex justify-between items-center translate-y-8">
+                    <div class="time-display text-sm text-gray-500">0:00</div>
+                    <div class="progress-text text-center text-sm text-gray-500">Ready</div>
+                    <button play disabled class="text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M128,96v320l256-160L128,96L128,96z"/></svg>
+                    </button>
+                </div>
+                
+                <div class="spinner absolute z-50 w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden justify-center items-center backdrop-blur-lg">
+                    <div class="w-10 h-10 border-4 border-gray-500 border-t-gray-300 rounded-full animate-spin"></div>
+                </div>
             </div>
         </div>
         <div class="right w-[300px] h-full flex z-99 p-0 flex-col justify-start items-center bg-gray-800 border-l-2 border-gray-700 overflow-y-auto overflow-x-hidden">

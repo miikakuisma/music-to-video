@@ -16,7 +16,7 @@ function createWindow() {
       contextIsolation: false
     }
   });
-
+  mainWindow.maximize();
   mainWindow.loadFile('index.html');
 }
 
