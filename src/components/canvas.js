@@ -71,15 +71,7 @@ class WaveSurferCanvas extends HTMLElement {
         }
       });
       // Set up progress bar
-      this.wavesurfer.on('timeupdate', (seconds) => {
-        const progress = (seconds / this.wavesurfer.getDuration()) * 100;
-        document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        document.querySelector('.time-display').textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-
-        document.querySelector('.progress-handle').style.left = `${progress}%`;
-      });
+      this.setupProgressHandlers();
     });
 
     // Add error handling for WaveSurfer initialization
@@ -108,15 +100,90 @@ class WaveSurferCanvas extends HTMLElement {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     });
+  }
 
-    // clicking on progress bar jumps to that time
-    document.querySelector('.progress-bar').addEventListener('click', (e) => {
-      const canvasRect = this.wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
-      let relativeX = e.clientX - canvasRect.left;
-      relativeX = Math.max(0, Math.min(relativeX, canvasRect.width));
-      const newTime = (relativeX / canvasRect.width) * this.wavesurfer.getDuration();
-      this.wavesurfer.setTime(newTime);
+  setupProgressHandlers() {
+    // Get elements and store references
+    const progressBar = document.querySelector('.progress-bar');
+    const progressHandle = document.querySelector('.progress-handle');
+    const progressBarFill = document.querySelector('.progress-bar-fill');
+    
+    // Handler for progress bar clicks
+    progressBar.addEventListener('click', (e) => {
+      // If waveform is hidden, use the progress bar itself for calculations
+      let rect;
+      if (!this.waveformVisible && progressBar) {
+        rect = progressBar.getBoundingClientRect();
+      } else {
+        rect = this.wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
+      }
+      
+      let relativeX = e.clientX - rect.left;
+      relativeX = Math.max(0, Math.min(relativeX, rect.width));
+      const newPosition = relativeX / rect.width;
+      
+      // Update UI elements
+      progressBarFill.style.width = `${newPosition * 100}%`;
+      progressHandle.style.left = `${newPosition * 100}%`;
+      
+      // Update time
+      if (this.wavesurfer && this.wavesurfer.getDuration()) {
+        const newTime = newPosition * this.wavesurfer.getDuration();
+        this.wavesurfer.setTime(newTime);
+      }
     });
+    
+    // Handler for drag operations on progress handle
+    progressHandle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      
+      const handleMouseMove = (e) => {
+        // Use progress bar for position calculation when waveform is hidden
+        let rect;
+        if (!this.waveformVisible && progressBar) {
+          rect = progressBar.getBoundingClientRect();
+        } else {
+          rect = this.wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
+        }
+        
+        let relativeX = e.clientX - rect.left;
+        relativeX = Math.max(0, Math.min(relativeX, rect.width));
+        const newPosition = relativeX / rect.width;
+        
+        // Update UI
+        progressBarFill.style.width = `${newPosition * 100}%`;
+        progressHandle.style.left = `${newPosition * 100}%`;
+        
+        // Update audio if available
+        if (this.wavesurfer && this.wavesurfer.getDuration()) {
+          const newTime = newPosition * this.wavesurfer.getDuration();
+          this.wavesurfer.setTime(newTime);
+        }
+      };
+      
+      const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    });
+    
+    // Add timeupdate event listener to keep UI elements in sync
+    this.wavesurfer.on('timeupdate', (seconds) => {
+      const progress = (seconds / this.wavesurfer.getDuration()) * 100;
+      progressBarFill.style.width = `${progress}%`;
+      progressHandle.style.left = `${progress}%`;
+      
+      // Update time display
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      document.querySelector('.time-display').textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    });
+    
+    // Initialize property for tracking visibility
+    this.waveformVisible = true;
   }
 
   loadFile(file) {

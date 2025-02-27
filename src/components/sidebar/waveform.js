@@ -105,6 +105,10 @@ class WaveformControls extends HTMLElement {
       } else {
         document.querySelector('#waveform').style.display = 'none';
       }
+      
+      // Even when waveform is hidden, ensure progress tracking still works
+      // Store display state on wavesurfer element for reference
+      document.querySelector('wave-surfer').waveformVisible = this.enabled;
     })
 
     document.getElementById('waveformColor').addEventListener('input', this.updateWaveform);
