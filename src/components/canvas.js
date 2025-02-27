@@ -108,6 +108,15 @@ class WaveSurferCanvas extends HTMLElement {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     });
+
+    // clicking on progress bar jumps to that time
+    document.querySelector('.progress-bar').addEventListener('click', (e) => {
+      const canvasRect = this.wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
+      let relativeX = e.clientX - canvasRect.left;
+      relativeX = Math.max(0, Math.min(relativeX, canvasRect.width));
+      const newTime = (relativeX / canvasRect.width) * this.wavesurfer.getDuration();
+      this.wavesurfer.setTime(newTime);
+    });
   }
 
   loadFile(file) {

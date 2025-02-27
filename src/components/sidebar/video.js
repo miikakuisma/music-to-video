@@ -1,10 +1,24 @@
 class VideoControls extends HTMLElement {
   constructor() {
     super();
+    this.sizes = {
+      '1080p': { width: 1920, height: 1080 },
+      '720p': { width: 1280, height: 720 },
+      '480p': { width: 960, height: 480 },
+      '360p': { width: 640, height: 360 }
+    };
+    this.currentSize = '360p';
+    this.currentOrientation = 'landscape';
   }
   
   connectedCallback() {
     this.render();
+    this.attachEventListeners();
+    
+    // Initial setup
+    setTimeout(() => {
+      this.updateDimensions();
+    }, 500);
   }
   
   render() {
@@ -23,7 +37,7 @@ class VideoControls extends HTMLElement {
         <div class="form-group">
           <label class="form-label" for="orientationMenu">Orientation</label>
           <select id="orientationMenu" class="form-input">
-            <option value="landscape">Landscape</option>
+            <option value="landscape" selected>Landscape</option>
             <option value="portrait">Portrait</option>
           </select>
         </div>
@@ -37,137 +51,141 @@ class VideoControls extends HTMLElement {
         </button>
       </div>
     `;
-
-    document.getElementById('sizeMenu').addEventListener('change', () => {
-      // determine the size of the video based on selected size
-      const size = document.getElementById('sizeMenu').value;
-      let width = size === '1080p' ? 1920 : size === '720p' ? 1280 : size === '480p' ? 960 : 640;
-      let height = size === '1080p' ? 1080 : size === '720p' ? 720 : size === '480p' ? 480 : 360;
-      // check orientation: if portrait, swap width and height
-      const orientation = document.getElementById('orientationMenu').value;
-      if (orientation === 'portrait') {
-        [width, height] = [height, width];
-      }
-
-      const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-
-      try {
-        wavesurfer.setOptions({
-          width: width,
-          height: height
-        });
-      } catch (error) {
-        console.error('Error setting waveform options:', error);
-      }
-
-      // set the size of the waveform container
-      document.querySelector('wave-surfer').width = width;
-      document.querySelector('wave-surfer').height = height;
-      document.querySelector('.waveform-container').style.width = width + 'px';
-      document.querySelector('.waveform-container').style.height = height + 'px';
-      document.querySelector('#textOverlay').setAttribute('width', width + 'px');
-      document.querySelector('#textOverlay').setAttribute('height', height + 'px');
-
-      document.querySelector('text-controls').renderText();
-
-      // After updating the container size, explicitly update the waveform
-      setTimeout(() => {
-        // Call our new function to update the waveform for the new size
-        if (typeof window.updateWaveformForOutputSize === 'function') {
-          window.updateWaveformForOutputSize();
-        } else {
-          // Fallback direct implementation
-          const wsElement = document.querySelector('wave-surfer');
-          const wavesurfer = wsElement.wavesurfer;
-          const videoWidth = wsElement.width;
-          const videoHeight = wsElement.height;
-          
-          try {
-            wavesurfer.setOptions({
-              width: videoWidth,
-              height: videoHeight
-            });
-            
-            // Update canvas references
-            wsElement.waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
-            wsElement.progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
-            
-            // Re-render text
-            document.querySelector('text-controls').renderText();
-          } catch (error) {
-            console.error('Error updating wavesurfer for size change:', error);
-          }
-        }
-      }, 200);
-    });
-
-    document.getElementById('orientationMenu').addEventListener('change', () => {
-      const orientation = document.getElementById('orientationMenu').value;
-      const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-      const size = document.getElementById('sizeMenu').value;
-      let baseWidth, baseHeight;
-      if (size === '1080p') {
-          baseWidth = 1920;
-          baseHeight = 1080;
-      } else if (size === '720p') {
-          baseWidth = 1280;
-          baseHeight = 720;
-      } else if (size === '480p') {
-          baseWidth = 960;
-          baseHeight = 480;
-      } else {
-          baseWidth = 640;
-          baseHeight = 360;
-      }
-      const width = orientation === 'portrait' ? baseHeight : baseWidth;
-      const height = orientation === 'portrait' ? baseWidth : baseHeight;
-      wavesurfer.setOptions({ width, height });
-
-      document.querySelector('wave-surfer').width = width;
-      document.querySelector('wave-surfer').height = height;
-      document.querySelector('.waveform-container').style.width = width + 'px';
-      document.querySelector('.waveform-container').style.height = height + 'px';
-      document.querySelector('#textOverlay').setAttribute('width', width + 'px');
-      document.querySelector('#textOverlay').setAttribute('height', height + 'px');
-      document.querySelector('text-controls').renderText();
-      this.updateVideo();
-    });
-
-    setTimeout(() => {
-      this.updateVideo();
-    }, 500);
   }
+  
+  attachEventListeners() {
+    // Add event listeners for size and orientation changes
+    document.getElementById('sizeMenu').addEventListener('change', (e) => {
+      this.currentSize = e.target.value;
+      this.updateDimensions();
+    });
 
-  updateVideo() {
-    const size = document.getElementById('sizeMenu').value;
-    const orientation = document.getElementById('orientationMenu').value;
-    let baseWidth, baseHeight;
-    if (size === '1080p') {
-      baseWidth = 1920;
-      baseHeight = 1080;
-    } else if (size === '720p') {
-      baseWidth = 1280;
-      baseHeight = 720;
-    } else if (size === '480p') {
-      baseWidth = 960;
-      baseHeight = 480;
+    document.getElementById('orientationMenu').addEventListener('change', (e) => {
+      this.currentOrientation = e.target.value;
+      this.updateDimensions();
+    });
+  }
+  
+  /**
+   * Calculate current dimensions based on size and orientation
+   * @returns {Object} width and height values
+   */
+  calculateDimensions() {
+    const baseSize = this.sizes[this.currentSize];
+    if (!baseSize) return { width: 640, height: 360 }; // Default fallback
+    
+    if (this.currentOrientation === 'landscape') {
+      return { width: baseSize.width, height: baseSize.height };
     } else {
-      baseWidth = 640;
-      baseHeight = 360;
+      return { width: baseSize.height, height: baseSize.width };
     }
-    const width = orientation === 'portrait' ? baseHeight : baseWidth;
-    const height = orientation === 'portrait' ? baseWidth : baseHeight;
+  }
+  
+  /**
+   * Update all UI elements with the new dimensions
+   */
+  updateDimensions() {
+    const { width, height } = this.calculateDimensions();
+    const wsElement = document.querySelector('wave-surfer');
+    const wavesurfer = wsElement.wavesurfer;
     
-    const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-    
+    // Update wavesurfer dimensions
     try {
       wavesurfer.setOptions({
         width: width,
         height: height
       });
     } catch (error) {
-      console.error('Error setting waveform options:', error);
+      console.error('Error setting waveform dimensions:', error);
     }
+    
+    // Update container dimensions
+    wsElement.width = width;
+    wsElement.height = height;
+    document.querySelector('.waveform-container').style.width = `${width}px`;
+    document.querySelector('.waveform-container').style.height = `${height}px`;
+    
+    // Update text overlay
+    const textOverlay = document.querySelector('#textOverlay');
+    textOverlay.setAttribute('width', `${width}px`);
+    textOverlay.setAttribute('height', `${height}px`);
+    
+    // Update text and refresh waveform
+    this.updateWaveformAndText();
+  }
+  
+  /**
+   * Update text and waveform elements after dimension changes
+   */
+  updateWaveformAndText() {
+    // Render text with new dimensions
+    document.querySelector('text-controls').renderText();
+    
+    // Update waveform with new dimensions
+    this.updateWaveform();
+  }
+  
+  /**
+   * Update wavesurfer for new dimensions
+   */
+  updateWaveform() {
+    const wsElement = document.querySelector('wave-surfer');
+    const wavesurfer = wsElement.wavesurfer;
+    
+    if (!wavesurfer) return;
+    
+    try {
+      // Get current height settings
+      const waveHeight = document.getElementById('waveHeight');
+      const heightValue = waveHeight ? waveHeight.value : 0.5;
+      const { width, height } = this.calculateDimensions();
+      
+      // Different scaling based on orientation
+      if (this.currentOrientation === 'landscape') {
+        // In landscape, apply height scaling to height
+        wavesurfer.setOptions({
+          width: width,
+          height: height * parseFloat(heightValue)
+        });
+      } else {
+        // In portrait, the height is the original width, so we need to adjust differently
+        // Scale the new height (which was the original width) to maintain proportions
+        const heightScale = parseFloat(heightValue);
+        
+        wavesurfer.setOptions({
+          width: width,
+          height: height // Use full height in portrait mode
+        });
+        
+        // Adjust waveform container proportions if needed
+        const container = document.querySelector('.waveform-container');
+        if (container) {
+          // Ensure the waveform container takes the full height
+          container.style.height = `${height}px`;
+        }
+      }
+      
+      // Update canvas references
+      wsElement.waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
+      wsElement.progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
+      
+      // Make sure position alignment is respected
+      const barAlign = document.getElementById('barAlign');
+      if (barAlign) {
+        wavesurfer.setOptions({
+          barAlign: barAlign.value
+        });
+      }
+    } catch (error) {
+      console.error('Error updating waveform after dimension change:', error);
+    }
+  }
+  
+  /**
+   * Public method to update video settings
+   */
+  updateVideo() {
+    this.updateDimensions();
   }
 }
 

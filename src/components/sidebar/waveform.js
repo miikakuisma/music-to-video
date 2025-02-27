@@ -127,7 +127,8 @@ class WaveformControls extends HTMLElement {
     const barAlign = document.getElementById('barAlign').value;
     const barHeight = document.getElementById('waveHeight').value;
     const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-
+    const videoControls = document.querySelector('video-controls');
+    
     // update timeline model from input fields
     timeline[0].waveformColor = waveformColor;
     timeline[0].progressColor = progressColor;
@@ -138,15 +139,21 @@ class WaveformControls extends HTMLElement {
     timeline[0].barAlign = barAlign;
 
     try {
+      // Get current dimensions and orientation from video controls
+      const { width, height } = videoControls.calculateDimensions();
+      const isPortrait = videoControls.currentOrientation === 'portrait';
+      
       wavesurfer.setOptions({
         waveColor: waveformColor,
         progressColor: progressColor,
         barWidth: barWidth,
-        barHeight: timeline[0].barHeight,
         barGap: barGap,
         cursorWidth: cursorWidth,
         barAlign: barAlign
       });
+      
+      // Let video controls handle dimension changes to keep them consistent
+      videoControls.updateWaveform();
     } catch (error) {
       console.error('Error setting waveform options:', error);
     }
