@@ -1,7 +1,6 @@
 # Music to Video
 
-![Screenshot 2025-02-20 at 11 31 05](https://github.com/user-attachments/assets/d5fcefd1-a7a3-41ae-9452-46b51cd2b9dd)
-
+![Screenshot 2025-02-27 at 11 43 16](https://github.com/user-attachments/assets/7005e209-a770-4ec3-adf7-33bc2943dab7)
 
 A desktop application that automatically generates aesthetic waveform videos from your audio files. Simply drag and drop your MP3 or WAV files and get beautiful visualizations perfect for YouTube, social media, or any platform that requires video format.
 
