@@ -20,6 +20,13 @@ class VideoControls extends HTMLElement {
             <option value="360p" selected>360p</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label" for="orientationMenu">Orientation</label>
+          <select id="orientationMenu" class="form-input">
+            <option value="landscape">Landscape</option>
+            <option value="portrait">Portrait</option>
+          </select>
+        </div>
       </details>
 
       <div class="h-20"></div>
@@ -32,10 +39,15 @@ class VideoControls extends HTMLElement {
     `;
 
     document.getElementById('sizeMenu').addEventListener('change', () => {
-      // determine the size of the video
+      // determine the size of the video based on selected size
       const size = document.getElementById('sizeMenu').value;
-      const width = size === '1080p' ? 1920 : size === '720p' ? 1280 : size === '480p' ? 960 : 640;
-      const height = size === '1080p' ? 1080 : size === '720p' ? 720 : size === '480p' ? 480 : 360;
+      let width = size === '1080p' ? 1920 : size === '720p' ? 1280 : size === '480p' ? 960 : 640;
+      let height = size === '1080p' ? 1080 : size === '720p' ? 720 : size === '480p' ? 480 : 360;
+      // check orientation: if portrait, swap width and height
+      const orientation = document.getElementById('orientationMenu').value;
+      if (orientation === 'portrait') {
+        [width, height] = [height, width];
+      }
 
       const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
 
@@ -90,6 +102,38 @@ class VideoControls extends HTMLElement {
       }, 200);
     });
 
+    document.getElementById('orientationMenu').addEventListener('change', () => {
+      const orientation = document.getElementById('orientationMenu').value;
+      const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+      const size = document.getElementById('sizeMenu').value;
+      let baseWidth, baseHeight;
+      if (size === '1080p') {
+          baseWidth = 1920;
+          baseHeight = 1080;
+      } else if (size === '720p') {
+          baseWidth = 1280;
+          baseHeight = 720;
+      } else if (size === '480p') {
+          baseWidth = 960;
+          baseHeight = 480;
+      } else {
+          baseWidth = 640;
+          baseHeight = 360;
+      }
+      const width = orientation === 'portrait' ? baseHeight : baseWidth;
+      const height = orientation === 'portrait' ? baseWidth : baseHeight;
+      wavesurfer.setOptions({ width, height });
+
+      document.querySelector('wave-surfer').width = width;
+      document.querySelector('wave-surfer').height = height;
+      document.querySelector('.waveform-container').style.width = width + 'px';
+      document.querySelector('.waveform-container').style.height = height + 'px';
+      document.querySelector('#textOverlay').setAttribute('width', width + 'px');
+      document.querySelector('#textOverlay').setAttribute('height', height + 'px');
+      document.querySelector('text-controls').renderText();
+      this.updateVideo();
+    });
+
     setTimeout(() => {
       this.updateVideo();
     }, 500);
@@ -97,11 +141,26 @@ class VideoControls extends HTMLElement {
 
   updateVideo() {
     const size = document.getElementById('sizeMenu').value;
-    const width = size === '1080p' ? 1920 : size === '720p' ? 1280 : size === '480p' ? 960 : 640;
-    const height = size === '1080p' ? 1080 : size === '720p' ? 720 : size === '480p' ? 480 : 360;
-
+    const orientation = document.getElementById('orientationMenu').value;
+    let baseWidth, baseHeight;
+    if (size === '1080p') {
+      baseWidth = 1920;
+      baseHeight = 1080;
+    } else if (size === '720p') {
+      baseWidth = 1280;
+      baseHeight = 720;
+    } else if (size === '480p') {
+      baseWidth = 960;
+      baseHeight = 480;
+    } else {
+      baseWidth = 640;
+      baseHeight = 360;
+    }
+    const width = orientation === 'portrait' ? baseHeight : baseWidth;
+    const height = orientation === 'portrait' ? baseWidth : baseHeight;
+    
     const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
-
+    
     try {
       wavesurfer.setOptions({
         width: width,
