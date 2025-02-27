@@ -112,6 +112,7 @@ async function handleFileDrop(e) {
     document.querySelector('.spinner').classList.add('hidden');
 
     document.querySelector('text-controls').renderText();
+    document.querySelector('waveform-controls').updateWaveform();
     document.querySelector('.progress-text').innerText = '';
 
     document.querySelector('button[play]').disabled = false;

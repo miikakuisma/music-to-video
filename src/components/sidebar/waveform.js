@@ -25,7 +25,7 @@ class WaveformControls extends HTMLElement {
           <select id="waveHeight" class="form-input">
             <option value="1">100%</option>
             <option value="0.75">75%</option>
-            <option value="0.5" selected>50%</option>
+            <option value="0.5">50%</option>
             <option value="0.333">33%</option>
             <option value="0.25">25%</option>
             <option value="0.20">20%</option>
@@ -82,6 +82,8 @@ class WaveformControls extends HTMLElement {
         </div>
       </details>
     `;
+
+    document.getElementById('waveHeight').value = timeline[0].barHeight;
 
     document.getElementById('waveHeight').addEventListener('change', () => {
       const heightDivider = document.getElementById('waveHeight').value;

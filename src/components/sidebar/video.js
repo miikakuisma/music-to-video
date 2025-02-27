@@ -140,29 +140,16 @@ class VideoControls extends HTMLElement {
       const heightValue = waveHeight ? waveHeight.value : 0.5;
       const { width, height } = this.calculateDimensions();
       
-      // Different scaling based on orientation
-      if (this.currentOrientation === 'landscape') {
-        // In landscape, apply height scaling to height
-        wavesurfer.setOptions({
-          width: width,
-          height: height * parseFloat(heightValue)
-        });
-      } else {
-        // In portrait, the height is the original width, so we need to adjust differently
-        // Scale the new height (which was the original width) to maintain proportions
-        const heightScale = parseFloat(heightValue);
-        
-        wavesurfer.setOptions({
-          width: width,
-          height: height // Use full height in portrait mode
-        });
-        
-        // Adjust waveform container proportions if needed
-        const container = document.querySelector('.waveform-container');
-        if (container) {
-          // Ensure the waveform container takes the full height
-          container.style.height = `${height}px`;
-        }
+      wavesurfer.setOptions({
+        width: width,
+        height: height
+      });
+      
+      // Adjust waveform container proportions if needed
+      const container = document.querySelector('.waveform-container');
+      if (container) {
+        // Ensure the waveform container takes the full height
+        container.style.height = `${height}px`;
       }
       
       // Update canvas references
