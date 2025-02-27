@@ -59,7 +59,7 @@ yarn build
 ```
 
 ## Coming up
-- Vertical orientation
+- Full timeline support for animating elements (work in progress) 
 - Audio processing (such as normalize)
   
 
