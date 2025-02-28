@@ -7,6 +7,9 @@ class WaveSurferWrapper extends HTMLElement {
     this.progressCanvas = null;
     this.width = 640;
     this.height = 360;
+    this.zoom = 1;
+    this.maxZoom = 3;
+    this.minZoom = 0.5;
   }
   
   connectedCallback() {
@@ -18,7 +21,7 @@ class WaveSurferWrapper extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <div class="waveform-container" style="width: ${this.width}px; height: ${this.height}px;">
+      <div class="waveform-container" style="width: ${this.width}px; height: ${this.height}px; zoom: ${this.zoom};">
         <div class="canvas-stack">
           <canvas id="textOverlay"></canvas>
           <div id="waveform"></div>
@@ -73,23 +76,66 @@ class WaveSurferWrapper extends HTMLElement {
   }
 
   loadFile(file) {
+    // Set the audiofile property
+    this.audiofile = file;
+    
     return new Promise((resolve, reject) => {
       try {
-        this.querySelector('.waveform-container').classList.add('file-loaded');
-        this.wavesurfer.loadBlob(file);
-        this.wavesurfer.on('ready', () => {
-          setTimeout(() => {
-            document.querySelector('background-controls').updateBackground();
-            document.querySelector('waveform-controls').updateWaveform();
-            document.querySelector('text-controls').renderText();
-            document.querySelector('video-controls').updateVideo();
-            resolve();
-          }, 0);
+        // Create a URL for the file
+        const url = URL.createObjectURL(file);
+        
+        // Load the audio file
+        this.wavesurfer.load(url);
+        
+        // Wait for the waveform to be ready
+        this.wavesurfer.once('ready', () => {
+          document.querySelector('background-controls').updateBackground();
+          document.querySelector('waveform-controls').updateWaveform();
+          document.querySelector('text-controls').renderText();
+          document.querySelector('video-controls').updateVideo();
+          
+          // Hide the spinner and update UI
+          document.querySelector('wr-spinner').setAttribute('visible', 'false');
+          document.querySelector('.progress-text').innerText = '';
+          document.querySelector('button[play]').disabled = false;
+
+          this.querySelector('.waveform-container').classList.add('file-loaded');
+          
+          resolve();
         });
       } catch (error) {
         reject(error);
       }
     });
+  }
+
+  zoomIn() {
+    this.zoom = Math.min(this.maxZoom, this.zoom + 0.25);
+    this.applyZoom();
+    return this.zoom;
+  }
+  
+  zoomOut() {
+    this.zoom = Math.max(this.minZoom, this.zoom - 0.25);
+    this.applyZoom();
+    return this.zoom;
+  }
+  
+  resetZoom() {
+    this.zoom = 1;
+    this.applyZoom();
+    return this.zoom;
+  }
+  
+  applyZoom() {
+    const container = this.querySelector('.waveform-container');
+    container.style.zoom = this.zoom;
+    
+    // Dispatch an event so other components can react to zoom changes
+    this.dispatchEvent(new CustomEvent('zoom-changed', { 
+      detail: { zoom: this.zoom }, 
+      bubbles: true 
+    }));
   }
 }
 

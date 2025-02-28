@@ -24,7 +24,7 @@ class VideoControls extends HTMLElement {
   render() {
     this.innerHTML = `
       <div class="form-group">
-        <label class="form-label" for="sizeMenu">Size</label>
+        <label class="form-label" for="sizeMenu">Video Size</label>
         <select id="sizeMenu" class="form-input">
           <option value="1080p">1080p</option>
           <option value="720p">720p</option>

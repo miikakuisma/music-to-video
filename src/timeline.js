@@ -12,6 +12,7 @@ window.timeline = [
     shadowEnabled: true,
     waveformColor: '#999999',
     progressColor: '#ffffff',
+    cursorColor: '#ffffff', // TO DO: add to editor
     barWidth: 4,
     barHeight: 0.5,
     barGap: 2,

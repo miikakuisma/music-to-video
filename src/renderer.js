@@ -1,6 +1,7 @@
 // Add these imports at the top of renderer.js
 const fs = require('fs');
 const path = require('path');
+const { ipcRenderer } = require('electron');
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,71 +50,9 @@ async function handleFileDrop(e) {
   if (file && (file.type.startsWith('audio/'))) {
     document.querySelector('wr-wavesurfer').audiofile = file;
     document.getElementById('renderBtn').disabled = false;
-
     document.querySelector('wr-spinner').setAttribute('visible', 'true');
     document.querySelector('.progress-text').innerText = 'Loading audio..';
-
-    await document.querySelector('wr-wavesurfer').loadFile(file);
-
-    if (file.type === 'audio/mpeg') {
-      try {
-        document.querySelector('.progress-text').innerText = 'Reading ID3 tags..';
-
-        // Use CommonJS require
-        const { parseBuffer } = require('music-metadata');
-        
-        // Convert File to Buffer
-        const buffer = await file.arrayBuffer();
-        const metadata = await parseBuffer(
-          Buffer.from(buffer),
-          { mimeType: file.type }
-        );
-        
-        console.log('Metadata:', metadata);
-        
-        // Update the input fields with the metadata
-        if (metadata.common.title) {
-          document.getElementById('songTitleInput').value = metadata.common.title;
-        }
-        if (metadata.common.artist) {
-          document.getElementById('artistNameInput').value = metadata.common.artist;
-        }
-        // Load image from metadata
-        if (metadata.common.picture) {
-          const pictureData = metadata.common.picture[0].data;
-          const pictureFormat = metadata.common.picture[0].format;
-          const blob = new Blob([pictureData], { type: pictureFormat });
-          const imageUrl = URL.createObjectURL(blob);
-          document.querySelector('background-controls').updateBackground(imageUrl);
-          document.querySelector('background-controls').backgroundImage = imageUrl;
-        }
-      } catch (error) {
-        console.error('Error reading metadata:', error);
-        // Fallback to filename if metadata reading fails
-        const filename = file.name.replace(/\.[^/.]+$/, '');
-        document.getElementById('songTitleInput').value = filename;
-        document.getElementById('artistNameInput').value = '';
-      }
-    } else {
-      // Parse WAV filename (Artist - Song)
-      const filename = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-      const parts = filename.split('-').map(part => part.trim());
-      if (parts.length === 2) {
-        document.getElementById('artistNameInput').value = parts[0];
-        document.getElementById('songTitleInput').value = parts[1];
-      } else {
-        document.getElementById('songTitleInput').value = filename;
-        document.getElementById('artistNameInput').value = '';
-      }
-    }
-
-    document.querySelector('wr-spinner').setAttribute('visible', 'false');
-
-    document.querySelector('text-controls').renderText();
-    document.querySelector('waveform-controls').updateWaveform();
-    document.querySelector('.progress-text').innerText = '';
-
-    document.querySelector('button[play]').disabled = false;
+    document.querySelector('wr-wavesurfer').loadFile(file);
   }
 }
 
@@ -536,3 +475,48 @@ async function processAudioMetadata(file, filePath) {
     }
   }
 }
+
+// Listen for zoom commands from the main process
+ipcRenderer.on('zoom-in', () => {
+  const wavesurfer = document.querySelector('wr-wavesurfer');
+  const newZoom = wavesurfer.zoomIn();
+  console.log(`Zoomed in: ${newZoom}x`);
+});
+
+ipcRenderer.on('zoom-out', () => {
+  const wavesurfer = document.querySelector('wr-wavesurfer');
+  const newZoom = wavesurfer.zoomOut();
+  console.log(`Zoomed out: ${newZoom}x`);
+});
+
+ipcRenderer.on('zoom-reset', () => {
+  const wavesurfer = document.querySelector('wr-wavesurfer');
+  const newZoom = wavesurfer.resetZoom();
+  console.log(`Zoom reset: ${newZoom}x`);
+});
+
+// Add keyboard shortcuts for zoom
+document.addEventListener('keydown', (event) => {
+  const wavesurfer = document.querySelector('wr-wavesurfer');
+  
+  // Check if Ctrl or Command key is pressed
+  if (event.ctrlKey || event.metaKey) {
+    // Zoom in with Ctrl/Command + Plus
+    if (event.key === '=' || event.key === '+') {
+      event.preventDefault();
+      wavesurfer.zoomIn();
+    }
+    
+    // Zoom out with Ctrl/Command + Minus
+    if (event.key === '-' || event.key === '_') {
+      event.preventDefault();
+      wavesurfer.zoomOut();
+    }
+    
+    // Reset zoom with Ctrl/Command + 0
+    if (event.key === '0') {
+      event.preventDefault();
+      wavesurfer.resetZoom();
+    }
+  }
+});

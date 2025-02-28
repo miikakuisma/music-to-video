@@ -18,7 +18,7 @@ class BackgroundControls extends HTMLElement {
       </div>
 
       <div class="form-group">
-        <label class="form-label">Upload Background Image</label>
+        <label class="form-label">Pick Background Image</label>
         <div class="flex items-center gap-2">
           <input type="file" id="bgImageFile" accept="image/*" class="form-input">
         </div>
@@ -77,6 +77,12 @@ class BackgroundControls extends HTMLElement {
     document.getElementById('bgImage').addEventListener('input', this.updateBackground.bind(this));
     document.getElementById('shadowEnabled').addEventListener('change', (e) => {
       timeline[0].shadowEnabled = e.target.checked;
+      const shadowOverlay = document.querySelector('.background-shadow-overlay');
+      if (e.target.checked) {
+        shadowOverlay.style.display = 'block';
+      } else {
+        shadowOverlay.style.display = 'none';
+      }
     });
 
     document.getElementById('bgImageFile').addEventListener('change', (e) => {
@@ -143,11 +149,11 @@ class BackgroundControls extends HTMLElement {
     document.querySelector('.waveform-container').style.backgroundColor = bgColor;
     timeline[0].backgroundColor = bgColor;
     
-    const audioLoaded = document.querySelector('wr-wavesurfer').audiofile !== null;
+    // Don't require audio to be loaded to use a background image
     const bgImageInput = document.getElementById('bgImage');
     const bgImageUrl = imageUrl || bgImageInput.value;
     
-    if (bgImageUrl && audioLoaded) {
+    if (bgImageUrl) {
       // Update the stored image URL
       this.backgroundImage = bgImageUrl;
       timeline[0].backgroundImage = bgImageUrl;

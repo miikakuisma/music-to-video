@@ -10,9 +10,16 @@ class WaveformControls extends HTMLElement {
   
   render() {
     this.innerHTML = `
+      <div class="form-group">
+        <label class="form-label">Pick Audio File</label>
+        <div class="flex items-center gap-2">
+          <input type="file" id="audioFile" accept="audio/*" class="form-input">
+        </div>
+      </div>
+  
       <div class="flex justify-between align-center">
         <div class="form-group w-full mr-2 flex justify-between items-center">
-          <label class="toggle-label">Enabled</label>
+          <label class="toggle-label">Show Waveform</label>
           <input type="checkbox" id="waveformEnabled" class="toggle-switch" ${this.enabled ? 'checked' : ''}>
         </div>
       </div>
@@ -78,6 +85,13 @@ class WaveformControls extends HTMLElement {
         </div>
       </div>
     `;
+
+    document.getElementById('audioFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        document.querySelector('wr-wavesurfer').loadFile(file);
+      }
+    });
 
     document.getElementById('waveHeight').value = timeline[0].barHeight;
 

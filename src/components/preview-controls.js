@@ -138,7 +138,40 @@ class PreviewControls extends HTMLElement {
       </div>
 
       <div class="progress-text fixed bottom-8 left-0 right-[300px] text-center text-sm text-gray-500">Ready</div>
+
+      <div class="zoom-controls absolute top-3 right-3 z-30">
+        <button id="zoomOut" class="p-1 bg-gray-800 text-gray-300 rounded-l hover:bg-gray-700">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button id="resetZoom" class="p-1 bg-gray-800 text-gray-300 hover:bg-gray-700">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="7"></circle>
+            <line x1="12" y1="9" x2="12" y2="15"></line>
+          </svg>
+        </button>
+        <button id="zoomIn" class="p-1 bg-gray-800 text-gray-300 rounded-r hover:bg-gray-700">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
     `;
+    
+    // Add event listeners for zoom buttons
+    this.querySelector('#zoomIn').addEventListener('click', () => {
+      document.querySelector('wr-wavesurfer').zoomIn();
+    });
+    
+    this.querySelector('#zoomOut').addEventListener('click', () => {
+      document.querySelector('wr-wavesurfer').zoomOut();
+    });
+    
+    this.querySelector('#resetZoom').addEventListener('click', () => {
+      document.querySelector('wr-wavesurfer').resetZoom();
+    });
   }
 }
 
