@@ -17,57 +17,54 @@ class TextControls extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <details open>
-        <summary class="mb-2 text-sm text-gray-500">Text</summary>
-        <div class="form-group">
-          <input type="text" id="songTitleInput" placeholder="Song Title" class="form-input">
-        </div>
+      <div class="form-group">
+        <input type="text" id="songTitleInput" placeholder="Song Title" class="form-input">
+      </div>
+    
+      <div class="form-group">
+        <input type="text" id="artistNameInput" placeholder="Artist Name" class="form-input">
+      </div>
       
+      <div class="flex gap-2 items-center">
+        <select id="fontSelect" class="form-input flex-grow">
+          <option value="Arial">Arial</option>
+          <option value="Helvetica">Helvetica</option>
+          <option value="Times New Roman">Times New Roman</option>
+        </select>
+        <input type="number" id="fontSize" value="30" min="12" max="128" 
+          class="form-input w-20">
+          <input type="color" id="textColor" value="#ffffff" class="color-input">
+        </div>
+      </div>
+
+      <div class="form-group mt-4">
+        <select id="textAlign" class="form-input">
+          <option value="top-left">Top Left</option>
+          <option value="top-center" selected>Top Center</option>
+          <option value="top-right">Top Right</option>
+          <option value="center-left">Center Left</option>
+          <option value="center-center">Center Center</option>
+          <option value="center-right">Center Right</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-center">Bottom Center</option>
+          <option value="bottom-right">Bottom Right</option>
+        </select>
+      </div>
+
+      <div class="flex justify-between align-center mt-4 pr-10">
         <div class="form-group">
-          <input type="text" id="artistNameInput" placeholder="Artist Name" class="form-input">
-        </div>
-        
-        <div class="flex gap-2 items-center">
-          <select id="fontSelect" class="form-input flex-grow">
-            <option value="Arial">Arial</option>
-            <option value="Helvetica">Helvetica</option>
-            <option value="Times New Roman">Times New Roman</option>
-          </select>
-          <input type="number" id="fontSize" value="30" min="12" max="128" 
-            class="form-input w-20">
-            <input type="color" id="textColor" value="#ffffff" class="color-input">
+          <label class="form-label">X Offset</label>
+          <div class="flex items-center">
+            <input type="range" id="textOffsetX" min="-100" max="100" value="0" class="form-range">
           </div>
         </div>
-
-        <div class="form-group mt-4">
-          <select id="textAlign" class="form-input">
-            <option value="top-left">Top Left</option>
-            <option value="top-center" selected>Top Center</option>
-            <option value="top-right">Top Right</option>
-            <option value="center-left">Center Left</option>
-            <option value="center-center">Center Center</option>
-            <option value="center-right">Center Right</option>
-            <option value="bottom-left">Bottom Left</option>
-            <option value="bottom-center">Bottom Center</option>
-            <option value="bottom-right">Bottom Right</option>
-          </select>
-        </div>
-
-        <div class="flex justify-between align-center mt-4 pr-10">
-          <div class="form-group">
-            <label class="form-label">X Offset</label>
-            <div class="flex items-center">
-              <input type="range" id="textOffsetX" min="-100" max="100" value="0" class="form-range">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Y Offset</label>
-            <div class="flex items-center">
-              <input type="range" id="textOffsetY" min="-100" max="100" value="0" class="form-range">
-            </div>
+        <div class="form-group">
+          <label class="form-label">Y Offset</label>
+          <div class="flex items-center">
+            <input type="range" id="textOffsetY" min="-100" max="100" value="0" class="form-range">
           </div>
         </div>
-      </details>
+      </div>
     `;
 
     document.getElementById('songTitleInput').addEventListener('input', this.renderText);

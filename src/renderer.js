@@ -292,8 +292,37 @@ function drawBackgroundWithSettings(ctx, img, width, height) {
   ctx.drawImage(img, x, y, imgWidth, imgHeight);
 }
 
+// Add this function to ensure latest settings are captured before rendering
+function captureCurrentSettings() {
+  // Ensure waveform settings are up-to-date in the timeline model
+  const wsElement = document.querySelector('wr-wavesurfer');
+  const wavesurfer = wsElement.wavesurfer;
+  
+  // Get current values from UI
+  const barHeight = document.getElementById('waveHeight').value;
+  const barWidth = document.getElementById('barWidth').value;
+  const barGap = document.getElementById('barGap').value;
+  const barAlign = document.getElementById('barAlign').value;
+  
+  // Update timeline model
+  timeline[0].barHeight = parseFloat(barHeight);
+  timeline[0].barWidth = parseInt(barWidth);
+  timeline[0].barGap = parseInt(barGap);
+  timeline[0].barAlign = barAlign;
+  
+  console.log('Captured settings for rendering:', {
+    barHeight: timeline[0].barHeight,
+    barWidth: timeline[0].barWidth,
+    barGap: timeline[0].barGap,
+    barAlign: timeline[0].barAlign
+  });
+}
+
 // Replace the existing generateVideo function with this batch-based approach
 async function generateVideo() {
+  // Capture latest settings first
+  captureCurrentSettings();
+  
   const wavesurfer = document.querySelector('wr-wavesurfer').wavesurfer;
   const renderBtn = document.getElementById('renderBtn');
   renderBtn.disabled = true;

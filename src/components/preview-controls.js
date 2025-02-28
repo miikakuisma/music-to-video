@@ -132,11 +132,12 @@ class PreviewControls extends HTMLElement {
 
       <div class="absolute bottom-0 left-0 right-0 flex justify-between items-center translate-y-8">
           <div class="time-display text-sm text-gray-500">0:00</div>
-          <div class="progress-text text-center text-sm text-gray-500">Ready</div>
           <button play disabled class="text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed">
               <svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M128,96v320l256-160L128,96L128,96z"/></svg>
           </button>
       </div>
+
+      <div class="progress-text fixed bottom-8 left-0 right-[300px] text-center text-sm text-gray-500">Ready</div>
     `;
   }
 }

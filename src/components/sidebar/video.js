@@ -23,32 +23,21 @@ class VideoControls extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <details open>
-        <summary class="mb-2 text-sm text-gray-500">Video options</summary>
-        <div class="form-group">
-          <label class="form-label" for="sizeMenu">Size</label>
-          <select id="sizeMenu" class="form-input">
-            <option value="1080p">1080p</option>
-            <option value="720p">720p</option>
-            <option value="480p">480p</option>
-            <option value="360p" selected>360p</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="orientationMenu">Orientation</label>
-          <select id="orientationMenu" class="form-input">
-            <option value="landscape" selected>Landscape</option>
-            <option value="portrait">Portrait</option>
-          </select>
-        </div>
-      </details>
-
-      <div class="h-20"></div>
-
-      <div class="fixed bottom-0 right-0 p-4 w-[300px] flex justify-center items-center bg-gray-800 border-t-2 border-gray-700">
-        <button id="renderBtn" disabled class="btn-primary">
-          Export Video
-        </button>
+      <div class="form-group">
+        <label class="form-label" for="sizeMenu">Size</label>
+        <select id="sizeMenu" class="form-input">
+          <option value="1080p">1080p</option>
+          <option value="720p">720p</option>
+          <option value="480p">480p</option>
+          <option value="360p" selected>360p</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="orientationMenu">Orientation</label>
+        <select id="orientationMenu" class="form-input">
+          <option value="landscape" selected>Landscape</option>
+          <option value="portrait">Portrait</option>
+        </select>
       </div>
     `;
   }
@@ -118,11 +107,10 @@ class VideoControls extends HTMLElement {
    * Update text and waveform elements after dimension changes
    */
   updateWaveformAndText() {
-    // Render text with new dimensions
-    document.querySelector('text-controls').renderText();
-    
     // Update waveform with new dimensions
     this.updateWaveform();
+    // Render text with new dimensions
+    document.querySelector('text-controls').renderText();
   }
   
   /**
@@ -136,8 +124,6 @@ class VideoControls extends HTMLElement {
     
     try {
       // Get current height settings
-      const waveHeight = document.getElementById('waveHeight');
-      const heightValue = waveHeight ? waveHeight.value : 0.5;
       const { width, height } = this.calculateDimensions();
       
       wavesurfer.setOptions({
@@ -149,6 +135,7 @@ class VideoControls extends HTMLElement {
       const container = document.querySelector('.waveform-container');
       if (container) {
         // Ensure the waveform container takes the full height
+        container.style.width = `${width}px`;
         container.style.height = `${height}px`;
       }
       

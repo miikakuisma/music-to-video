@@ -10,77 +10,73 @@ class WaveformControls extends HTMLElement {
   
   render() {
     this.innerHTML = `
-      <details open>
-        <summary class="mb-2 text-sm text-gray-500">Waveform</summary>
+      <div class="flex justify-between align-center">
+        <div class="form-group w-full mr-2 flex justify-between items-center">
+          <label class="toggle-label">Enabled</label>
+          <input type="checkbox" id="waveformEnabled" class="toggle-switch" ${this.enabled ? 'checked' : ''}>
+        </div>
+      </div>
 
-         <div class="flex justify-between align-center">
-          <div class="form-group w-full mr-2 flex justify-between items-center">
-            <label class="toggle-label">Enabled</label>
-            <input type="checkbox" id="waveformEnabled" class="toggle-switch" ${this.enabled ? 'checked' : ''}>
+      <div class="form-group">
+        <label class="form-label">Height</label>
+        <select id="waveHeight" class="form-input">
+          <option value="1">100%</option>
+          <option value="0.75">75%</option>
+          <option value="0.5">50%</option>
+          <option value="0.333">33%</option>
+          <option value="0.25">25%</option>
+          <option value="0.20">20%</option>
+        </select>
+      </div>
+
+      <div class="flex justify-between align-center">
+        <div class="form-group w-1/2 mr-1">
+          <label class="form-label">Wave Color</label>
+          <div class="flex items-center gap-2">
+            <input type="color" id="waveformColor" value="${timeline[0].waveformColor}" class="color-input">
           </div>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">Height</label>
-          <select id="waveHeight" class="form-input">
-            <option value="1">100%</option>
-            <option value="0.75">75%</option>
-            <option value="0.5">50%</option>
-            <option value="0.333">33%</option>
-            <option value="0.25">25%</option>
-            <option value="0.20">20%</option>
-          </select>
-        </div>
-
-        <div class="flex justify-between align-center">
-          <div class="form-group w-1/2 mr-1">
-            <label class="form-label">Wave Color</label>
-            <div class="flex items-center gap-2">
-              <input type="color" id="waveformColor" value="${timeline[0].waveformColor}" class="color-input">
-            </div>
-          </div>
-          <div class="form-group w-1/2 ml-1">
-            <label class="form-label">Progress Color</label>
-            <div class="flex items-center gap-2">
-              <input type="color" id="progressColor" value="${timeline[0].progressColor}" class="color-input">
-            </div>
+        <div class="form-group w-1/2 ml-1">
+          <label class="form-label">Progress Color</label>
+          <div class="flex items-center gap-2">
+            <input type="color" id="progressColor" value="${timeline[0].progressColor}" class="color-input">
           </div>
         </div>
+      </div>
 
-        <div class="flex justify-between align-center">
-          <div class="form-group w-1/2 mr-2">
-            <label class="form-label">Bar Width</label>
-            <div class="flex items-center gap-2">
-              <input type="number" id="barWidth" value="${timeline[0].barWidth}" class="form-input">
-            </div>
-          </div>
-          <div class="form-group w-1/2 ml-2">
-            <label class="form-label">Bar Gap</label>
-            <div class="flex items-center gap-2">
-              <input type="number" id="barGap" value="${timeline[0].barGap}" class="form-input">
-            </div>
+      <div class="flex justify-between align-center">
+        <div class="form-group w-1/2 mr-2">
+          <label class="form-label">Bar Width</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="barWidth" value="${timeline[0].barWidth}" class="form-input">
           </div>
         </div>
-
-        <div class="flex justify-between align-center">
-          <div class="form-group w-1/2 mr-2">
-            <label class="form-label">Cursor Width</label>
-            <div class="flex items-center gap-2">
-              <input type="number" id="cursorWidth" value="${timeline[0].cursorWidth}" class="form-input">
-            </div>
-          </div>
-          <div class="form-group w-1/2 ml-2">
-            <label class="form-label">Bar Align</label>
-            <div class="flex items-center gap-2">
-              <select id="barAlign" class="form-input" value="${timeline[0].barAlign}">
-                <option value="top">Top</option>
-                <option value="center">Center</option>
-                <option value="bottom" selected>Bottom</option>
-              </select>
-            </div>
+        <div class="form-group w-1/2 ml-2">
+          <label class="form-label">Bar Gap</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="barGap" value="${timeline[0].barGap}" class="form-input">
           </div>
         </div>
-      </details>
+      </div>
+
+      <div class="flex justify-between align-center">
+        <div class="form-group w-1/2 mr-2">
+          <label class="form-label">Cursor Width</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="cursorWidth" value="${timeline[0].cursorWidth}" class="form-input">
+          </div>
+        </div>
+        <div class="form-group w-1/2 ml-2">
+          <label class="form-label">Bar Align</label>
+          <div class="flex items-center gap-2">
+            <select id="barAlign" class="form-input" value="${timeline[0].barAlign}">
+              <option value="top">Top</option>
+              <option value="center">Center</option>
+              <option value="bottom" selected>Bottom</option>
+            </select>
+          </div>
+        </div>
+      </div>
     `;
 
     document.getElementById('waveHeight').value = timeline[0].barHeight;
