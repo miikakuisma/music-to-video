@@ -86,12 +86,7 @@ class WaveformControls extends HTMLElement {
       </div>
     `;
 
-    document.getElementById('audioFile').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        document.querySelector('wr-wavesurfer').loadFile(file);
-      }
-    });
+    document.getElementById('audioFile').addEventListener('change', handleFileDrop);
 
     document.getElementById('waveHeight').value = timeline[0].barHeight;
 
