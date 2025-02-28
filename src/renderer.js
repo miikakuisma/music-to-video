@@ -118,58 +118,58 @@ async function handleFileDrop(e) {
 }
 
 function exportWaveformWithProgress() {
-    return new Promise((resolve, reject) => {
-      // Grab the wave-surfer element and its canvases
-      const wsElement = document.querySelector('wr-wavesurfer');
-      const wavesurfer = wsElement.wavesurfer;
-      const waveformCanvas = wsElement.waveformCanvas;
-      const progressCanvas = wsElement.progressCanvas;
-      // Get the text overlay canvas (from canvas.js)
-      const textCanvas = document.getElementById('textOverlay');
+  return new Promise((resolve, reject) => {
+    // Grab the wave-surfer element and its canvases
+    const wsElement = document.querySelector('wr-wavesurfer');
+    const wavesurfer = wsElement.wavesurfer;
+    const waveformCanvas = wsElement.waveformCanvas;
+    const progressCanvas = wsElement.progressCanvas;
+    // Get the text overlay canvas (from canvas.js)
+    const textCanvas = document.getElementById('textOverlay');
 
-      // Use the output dimensions stored on the wave-surfer element.
-      const OUTPUT_WIDTH = wsElement.width;
-      const OUTPUT_HEIGHT = wsElement.height;
+    // Use the output dimensions stored on the wave-surfer element.
+    const OUTPUT_WIDTH = wsElement.width;
+    const OUTPUT_HEIGHT = wsElement.height;
 
-      // Create an offscreen canvas to composite the final image.
-      const clonedCanvas = document.createElement('canvas');
-      clonedCanvas.width = OUTPUT_WIDTH;
-      clonedCanvas.height = OUTPUT_HEIGHT;
-      const ctx = clonedCanvas.getContext('2d');
+    // Create an offscreen canvas to composite the final image.
+    const clonedCanvas = document.createElement('canvas');
+    clonedCanvas.width = OUTPUT_WIDTH;
+    clonedCanvas.height = OUTPUT_HEIGHT;
+    const ctx = clonedCanvas.getContext('2d');
 
-      // Fill the background with the selected color.
-      const bgColor = document.getElementById('bgColor').value;
-      ctx.fillStyle = bgColor;
-      ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+    // Fill the background with the selected color.
+    const bgColor = document.getElementById('bgColor').value;
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-      // Draw background image if provided, scaling it to fill the canvas.
-      const bgImageUrl = document.querySelector('background-controls').backgroundImage
-      if (bgImageUrl) {
-        const bgImage = new Image();
-        bgImage.src = bgImageUrl;
-
-        // Calculate dimensions to maintain aspect ratio and cover full area
-        const imageAspect = bgImage.width / bgImage.height;
-        const canvasAspect = OUTPUT_WIDTH / OUTPUT_HEIGHT;
-        
-        let renderWidth = OUTPUT_WIDTH;
-        let renderHeight = OUTPUT_HEIGHT;
-        let offsetX = 0;
-        let offsetY = 0;
-        
-        if (imageAspect > canvasAspect) {
-          // Image is wider - scale to height
-          renderWidth = OUTPUT_HEIGHT * imageAspect;
-          offsetX = (OUTPUT_WIDTH - renderWidth) / 2;
-        } else {
-          // Image is taller - scale to width
-          renderHeight = OUTPUT_WIDTH / imageAspect;
-          offsetY = (OUTPUT_HEIGHT - renderHeight) / 2;
-        }
-        
-        ctx.drawImage(bgImage, offsetX, offsetY, renderWidth, renderHeight);
+    // Draw background image if provided, scaling it to fill the canvas.
+    if (timeline[0].backgroundImage) {
+      const backgroundImg = new Image();
+      backgroundImg.src = timeline[0].backgroundImage;
+      
+      // Wait for the image to load
+      if (backgroundImg.complete) {
+        drawBackgroundWithSettings(ctx, backgroundImg, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+        continueProcessing();
+      } else {
+        backgroundImg.onload = () => {
+          drawBackgroundWithSettings(ctx, backgroundImg, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+          continueProcessing();
+        };
+        // Handle potential image loading failure
+        backgroundImg.onerror = () => {
+          console.error('Failed to load background image');
+          continueProcessing();
+        };
+        // Safety timeout
+        setTimeout(continueProcessing, 1000);
       }
-
+    } else {
+      continueProcessing();
+    }
+    
+    // Continue processing after the image loads or fails
+    function continueProcessing() {
       if (document.getElementById('shadowEnabled').checked) {
         // Draw gradient overlay (from transparent to 50% black) over the whole canvas.
         const gradient = ctx.createLinearGradient(0, 0, 0, OUTPUT_HEIGHT);
@@ -215,7 +215,81 @@ function exportWaveformWithProgress() {
 
       const imageURL = clonedCanvas.toDataURL('image/png');
       resolve(imageURL);
-    });
+    }
+  });
+}
+
+function drawBackgroundWithSettings(ctx, img, width, height) {
+  // Get settings from timeline
+  const scale = timeline[0].backgroundScale;
+  const position = timeline[0].backgroundPosition;
+  
+  // Calculate dimensions based on scaling mode
+  let imgWidth, imgHeight, x, y;
+  
+  if (scale === 'cover') {
+    // Cover - fill the entire canvas
+    const imgRatio = img.width / img.height;
+    const canvasRatio = width / height;
+    
+    if (imgRatio > canvasRatio) {
+      // Image is wider than canvas (relative to height)
+      imgHeight = height;
+      imgWidth = height * imgRatio;
+    } else {
+      // Image is taller than canvas (relative to width)
+      imgWidth = width;
+      imgHeight = width / imgRatio;
+    }
+  } else if (scale === 'contain') {
+    // Contain - fit within canvas
+    const imgRatio = img.width / img.height;
+    const canvasRatio = width / height;
+    
+    if (imgRatio > canvasRatio) {
+      // Image is wider than canvas (relative to height)
+      imgWidth = width;
+      imgHeight = width / imgRatio;
+    } else {
+      // Image is taller than canvas (relative to width)
+      imgHeight = height;
+      imgWidth = height * imgRatio;
+    }
+  } else if (scale === '100%') {
+    // Original size
+    imgWidth = img.width;
+    imgHeight = img.height;
+  } else if (scale === 'custom') {
+    // Custom scale percentage
+    const scaleFactor = timeline[0].backgroundCustomScale / 100;
+    imgWidth = img.width * scaleFactor;
+    imgHeight = img.height * scaleFactor;
+  }
+  
+  // Calculate position
+  if (position === 'center') {
+    x = (width - imgWidth) / 2;
+    y = (height - imgHeight) / 2;
+  } else if (position === 'top') {
+    x = (width - imgWidth) / 2;
+    y = 0;
+  } else if (position === 'bottom') {
+    x = (width - imgWidth) / 2;
+    y = height - imgHeight;
+  } else if (position === 'left') {
+    x = 0;
+    y = (height - imgHeight) / 2;
+  } else if (position === 'right') {
+    x = width - imgWidth;
+    y = (height - imgHeight) / 2;
+  } else if (position === 'custom') {
+    // Custom position percentages
+    x = width * (timeline[0].backgroundPositionX / 100) - imgWidth / 2;
+    y = height * (timeline[0].backgroundPositionY / 100) - imgHeight / 2;
+  }
+  
+  // Draw the image
+  ctx.drawImage(img, x, y, imgWidth, imgHeight);
 }
 
 // Replace the existing generateVideo function with this batch-based approach
