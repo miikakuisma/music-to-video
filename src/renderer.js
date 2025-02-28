@@ -47,14 +47,13 @@ async function handleFileDrop(e) {
   
   // Handle audio files
   if (file && (file.type.startsWith('audio/'))) {
-    document.querySelector('wave-surfer').audiofile = file;
+    document.querySelector('wr-wavesurfer').audiofile = file;
     document.getElementById('renderBtn').disabled = false;
 
-    document.querySelector('.spinner').classList.remove('hidden');
-    document.querySelector('.spinner').classList.add('flex');
+    document.querySelector('wr-spinner').setAttribute('visible', 'true');
     document.querySelector('.progress-text').innerText = 'Loading audio..';
 
-    await document.querySelector('wave-surfer').loadFile(file);
+    await document.querySelector('wr-wavesurfer').loadFile(file);
 
     if (file.type === 'audio/mpeg') {
       try {
@@ -108,8 +107,7 @@ async function handleFileDrop(e) {
       }
     }
 
-    document.querySelector('.spinner').classList.remove('flex');
-    document.querySelector('.spinner').classList.add('hidden');
+    document.querySelector('wr-spinner').setAttribute('visible', 'false');
 
     document.querySelector('text-controls').renderText();
     document.querySelector('waveform-controls').updateWaveform();
@@ -122,7 +120,7 @@ async function handleFileDrop(e) {
 function exportWaveformWithProgress() {
     return new Promise((resolve, reject) => {
       // Grab the wave-surfer element and its canvases
-      const wsElement = document.querySelector('wave-surfer');
+      const wsElement = document.querySelector('wr-wavesurfer');
       const wavesurfer = wsElement.wavesurfer;
       const waveformCanvas = wsElement.waveformCanvas;
       const progressCanvas = wsElement.progressCanvas;
@@ -222,21 +220,20 @@ function exportWaveformWithProgress() {
 
 // Replace the existing generateVideo function with this batch-based approach
 async function generateVideo() {
-  const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+  const wavesurfer = document.querySelector('wr-wavesurfer').wavesurfer;
   const renderBtn = document.getElementById('renderBtn');
   renderBtn.disabled = true;
   renderBtn.textContent = 'Generating...';
   
   // Show spinner
-  document.querySelector('.spinner').classList.remove('hidden');
-  document.querySelector('.spinner').classList.add('flex');
+  document.querySelector('wr-spinner').setAttribute('visible', 'true');
   
   const progressText = document.querySelector('.progress-text');
   progressText.textContent = 'Preparing to render...';
   
   try {
     const duration = wavesurfer.getDuration();
-    const videoWidth = document.querySelector('wave-surfer').width;
+    const videoWidth = document.querySelector('wr-wavesurfer').width;
     
     // Calculate optimal frame parameters
     // Limit frames to video width (no point in having more)
@@ -245,7 +242,7 @@ async function generateVideo() {
     
     // Start batch rendering
     const batchResult = await require('electron').ipcRenderer.invoke('start-batch-render', {
-      audioPath: document.querySelector('wave-surfer').audiofile.path,
+      audioPath: document.querySelector('wr-wavesurfer').audiofile.path,
       fps,
       frameCount
     });
@@ -315,8 +312,7 @@ async function generateVideo() {
     alert(`Error generating video: ${error.message}`);
   } finally {
     // Hide spinner
-    document.querySelector('.spinner').classList.remove('flex');
-    document.querySelector('.spinner').classList.add('hidden');
+    document.querySelector('wr-spinner').setAttribute('visible', 'false');
     
     // Re-enable render button
     renderBtn.disabled = false;
@@ -343,20 +339,18 @@ require('electron').ipcRenderer.on('load-audio-file', async (event, filePath) =>
     });
     
     // Pass the file to the existing handling code
-    document.querySelector('wave-surfer').audiofile = file;
+    document.querySelector('wr-wavesurfer').audiofile = file;
     document.getElementById('renderBtn').disabled = false;
 
-    document.querySelector('.spinner').classList.remove('hidden');
-    document.querySelector('.spinner').classList.add('flex');
+    document.querySelector('wr-spinner').setAttribute('visible', 'true');
     document.querySelector('.progress-text').innerText = 'Loading audio..';
 
-    await document.querySelector('wave-surfer').loadFile(file);
+    await document.querySelector('wr-wavesurfer').loadFile(file);
     
     // Process metadata similar to handleFileDrop
     processAudioMetadata(file, filePath);
     
-    document.querySelector('.spinner').classList.remove('flex');
-    document.querySelector('.spinner').classList.add('hidden');
+    document.querySelector('wr-spinner').setAttribute('visible', 'false');
     document.querySelector('text-controls').renderText();
     document.querySelector('.progress-text').innerText = '';
     document.querySelector('button[play]').disabled = false;

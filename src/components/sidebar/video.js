@@ -86,7 +86,7 @@ class VideoControls extends HTMLElement {
    */
   updateDimensions() {
     const { width, height } = this.calculateDimensions();
-    const wsElement = document.querySelector('wave-surfer');
+    const wsElement = document.querySelector('wr-wavesurfer');
     const wavesurfer = wsElement.wavesurfer;
     
     // Update wavesurfer dimensions
@@ -129,7 +129,7 @@ class VideoControls extends HTMLElement {
    * Update wavesurfer for new dimensions
    */
   updateWaveform() {
-    const wsElement = document.querySelector('wave-surfer');
+    const wsElement = document.querySelector('wr-wavesurfer');
     const wavesurfer = wsElement.wavesurfer;
     
     if (!wavesurfer) return;

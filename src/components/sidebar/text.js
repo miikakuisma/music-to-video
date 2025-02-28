@@ -85,8 +85,8 @@ class TextControls extends HTMLElement {
     textCtx = textCanvas.getContext('2d');
     
     // Set canvas size to match waveform
-    textCanvas.width = document.querySelector('wave-surfer').width;
-    textCanvas.height = document.querySelector('wave-surfer').height;
+    textCanvas.width = document.querySelector('wr-wavesurfer').width;
+    textCanvas.height = document.querySelector('wr-wavesurfer').height;
     
     // Initial render
     this.renderText();

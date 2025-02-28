@@ -88,7 +88,7 @@ class WaveformControls extends HTMLElement {
     document.getElementById('waveHeight').addEventListener('change', () => {
       const heightDivider = document.getElementById('waveHeight').value;
       try {
-        const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+        const wavesurfer = document.querySelector('wr-wavesurfer').wavesurfer;
         timeline[0].barHeight = parseFloat(heightDivider);
         wavesurfer.setOptions({
           barHeight: parseFloat(heightDivider)
@@ -108,7 +108,7 @@ class WaveformControls extends HTMLElement {
       
       // Even when waveform is hidden, ensure progress tracking still works
       // Store display state on wavesurfer element for reference
-      document.querySelector('wave-surfer').waveformVisible = this.enabled;
+      document.querySelector('wr-wavesurfer').waveformVisible = this.enabled;
     })
 
     document.getElementById('waveformColor').addEventListener('input', this.updateWaveform);
@@ -132,7 +132,7 @@ class WaveformControls extends HTMLElement {
     const cursorWidth = document.getElementById('cursorWidth').value;
     const barAlign = document.getElementById('barAlign').value;
     const barHeight = document.getElementById('waveHeight').value;
-    const wavesurfer = document.querySelector('wave-surfer').wavesurfer;
+    const wavesurfer = document.querySelector('wr-wavesurfer').wavesurfer;
     const videoControls = document.querySelector('video-controls');
     
     // update timeline model from input fields
@@ -164,8 +164,8 @@ class WaveformControls extends HTMLElement {
       console.error('Error setting waveform options:', error);
     }
 
-    document.querySelector('wave-surfer').waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
-    document.querySelector('wave-surfer').progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
+    document.querySelector('wr-wavesurfer').waveformCanvas = wavesurfer.renderer.canvasWrapper.querySelector('canvas');
+    document.querySelector('wr-wavesurfer').progressCanvas = wavesurfer.renderer.progressWrapper.querySelector('canvas');
   }
 }
 

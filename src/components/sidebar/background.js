@@ -55,7 +55,7 @@ class BackgroundControls extends HTMLElement {
   updateBackground(imageUrl) {
     const bgColor = document.getElementById('bgColor').value;
     document.querySelector('.waveform-container').style.backgroundColor = bgColor;
-    const audioLoaded = document.querySelector('wave-surfer').audiofile !== null;
+    const audioLoaded = document.querySelector('wr-wavesurfer').audiofile !== null;
     const bgImageInput = document.getElementById('bgImage');
     const waveformContainer = document.querySelector('.waveform-container');
     const bgImageUrl = imageUrl || bgImageInput.value;
