@@ -31,7 +31,7 @@ async function handleFileDrop(e) {
   const dropZone = document.querySelector('.drop-zone');
   dropZone.classList.remove('drag-over');
 
-  const file = e.target.files[0] ||e.dataTransfer.files[0];
+  const file = (e.target.files && e.target.files[0]) || e.dataTransfer.files[0];
   
   // Handle image files
   if (file.type.startsWith('image/')) {
