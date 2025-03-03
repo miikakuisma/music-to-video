@@ -132,8 +132,19 @@ class WaveSurferWrapper extends HTMLElement {
     if (previewElement) {
       const previewWidth = previewElement.clientWidth;
       const previewHeight = previewElement.clientHeight;
-      if (this.width > previewWidth || this.height > previewHeight) {
-        const zoomFactor = Math.min(previewWidth / this.width, previewHeight / this.height);
+      let effectiveWidth = this.width;
+      let effectiveHeight = this.height;
+      
+      // Support vertical (portrait) videos:
+      // If the video is vertical but the preview area is horizontal,
+      // swap the dimensions so that the rotated video fits better.
+      if (this.height > this.width && previewWidth > previewHeight) {
+        effectiveWidth = this.height;
+        effectiveHeight = this.width;
+      }
+      
+      if (effectiveWidth > previewWidth || effectiveHeight > previewHeight) {
+        const zoomFactor = Math.min(previewWidth / effectiveWidth, previewHeight / effectiveHeight);
         this.zoom = zoomFactor;
       } else {
         this.zoom = 1;
