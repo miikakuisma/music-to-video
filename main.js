@@ -1,11 +1,32 @@
 const { app, BrowserWindow, ipcMain, Menu, dialog } = require('electron');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
-// Set the ffmpeg path
+// Determine the correct FFmpeg path based on environment
+let ffmpegPath;
+if (app.isPackaged) {
+  // Production mode - use bundled FFmpeg
+  if (process.platform === 'darwin') {
+    // On macOS, point to the copied ffmpeg-static binary
+    ffmpegPath = path.join(process.resourcesPath, 'ffmpeg-static', 'ffmpeg');
+  } else if (process.platform === 'win32') {
+    // On Windows
+    ffmpegPath = path.join(process.resourcesPath, 'ffmpeg-static', 'ffmpeg.exe');
+  } else {
+    // On Linux
+    ffmpegPath = path.join(process.resourcesPath, 'ffmpeg-static', 'ffmpeg');
+  }
+  
+  console.log('Production FFmpeg path:', ffmpegPath);
+} else {
+  // Development mode - use ffmpeg from node_modules
+  ffmpegPath = require('ffmpeg-static');
+  console.log('Development FFmpeg path:', ffmpegPath);
+}
+
+// Set FFmpeg path globally
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 // Set the application name
@@ -159,8 +180,17 @@ ipcMain.handle('write-frame-batch', async (event, { frames }) => {
 });
 
 // Process all batches and generate the final video
-ipcMain.handle('process-video', async (event) => {
+ipcMain.handle('process-video', async (event, args) => {
   try {
+    // Log the FFmpeg path being used
+    console.log('Using FFmpeg path:', ffmpegPath);
+    
+    // Verify FFmpeg exists
+    if (!fs.existsSync(ffmpegPath)) {
+      console.error(`FFmpeg not found at path: ${ffmpegPath}`);
+      throw new Error(`FFmpeg binary not found at: ${ffmpegPath}`);
+    }
+    
     if (!global.renderState) {
       return { success: false, error: 'Render not initialized' };
     }
@@ -224,12 +254,7 @@ ipcMain.handle('process-video', async (event) => {
     return result;
   } catch (error) {
     console.error('Error processing video:', error);
-    
-    if (global.renderState) {
-      global.renderState.status = 'error';
-    }
-    
-    return { success: false, error: error.message };
+    throw error;
   }
 });
 
