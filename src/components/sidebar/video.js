@@ -87,10 +87,11 @@ class VideoControls extends HTMLElement {
     } catch (error) {
       console.error('Error setting waveform dimensions:', error);
     }
-    
+        
     // Update container dimensions
     wsElement.width = width;
     wsElement.height = height;
+    wsElement.zoomToFit();
     document.querySelector('.waveform-container').style.width = `${width}px`;
     document.querySelector('.waveform-container').style.height = `${height}px`;
     
@@ -101,6 +102,7 @@ class VideoControls extends HTMLElement {
     
     // Update text and refresh waveform
     this.updateWaveformAndText();
+
   }
   
   /**

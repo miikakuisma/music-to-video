@@ -126,6 +126,21 @@ class WaveSurferWrapper extends HTMLElement {
     this.applyZoom();
     return this.zoom;
   }
+
+  zoomToFit() {
+    const previewElement = document.querySelector('.preview');
+    if (previewElement) {
+      const previewWidth = previewElement.clientWidth;
+      const previewHeight = previewElement.clientHeight;
+      if (this.width > previewWidth || this.height > previewHeight) {
+        const zoomFactor = Math.min(previewWidth / this.width, previewHeight / this.height);
+        this.zoom = zoomFactor;
+      } else {
+        this.zoom = 1;
+      }
+      this.applyZoom();
+    }
+  }
   
   applyZoom() {
     const container = this.querySelector('.waveform-container');
