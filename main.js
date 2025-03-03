@@ -4,13 +4,76 @@ const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
 const { spawn } = require('child_process');
-const { createAppMenu } = require('./menu');
 
 // Set the ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 // Set the application name
 app.name = 'Wave Render';
+
+// Menu creation function directly in main.js
+function createAppMenu() {
+  const template = [
+    {
+      label: 'File',
+      submenu: [
+        { role: 'quit' }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      role: 'window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'close' }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+  return menu;
+}
+
+// Create menu when app is ready
+app.whenReady().then(() => {
+  // Create the application menu
+  createAppMenu();
+  
+  createWindow();
+  
+  app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+app.on('window-all-closed', function () {
+  if (process.platform !== 'darwin') app.quit();
+});
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -24,24 +87,7 @@ function createWindow() {
   });
   mainWindow.maximize();
   mainWindow.loadFile('index.html');
-  
-  // Set up the custom menu
-  createAppMenu();
 }
-
-app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
 
 // Replace the stream-video and write-frame handlers with this batch approach
 ipcMain.handle('start-batch-render', async (event, { audioPath, fps, frameCount }) => {
