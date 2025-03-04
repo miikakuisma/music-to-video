@@ -256,14 +256,25 @@ function drawBackgroundWithSettings(ctx, img, width, height) {
       imgWidth = height * imgRatio;
     }
   } else if (scale === '100%') {
-    // Original size
+    // Original size - use actual pixel dimensions of the image
     imgWidth = img.width;
     imgHeight = img.height;
   } else if (scale === 'custom') {
     // Custom scale percentage
     const scaleFactor = timeline[0].backgroundCustomScale / 100;
-    imgWidth = img.width * scaleFactor;
-    imgHeight = img.height * scaleFactor;
+    // Base the scaling on the maximum dimension to avoid images being too large
+    const maxDimension = Math.max(width, height);
+    const baseSize = Math.min(img.width, img.height);
+    const scaledSize = baseSize * scaleFactor;
+    const imgRatio = img.width / img.height;
+    
+    if (img.width > img.height) {
+      imgWidth = img.width * (scaledSize / img.height);
+      imgHeight = scaledSize;
+    } else {
+      imgWidth = scaledSize;
+      imgHeight = img.height * (scaledSize / img.width);
+    }
   }
   
   // Calculate position
@@ -286,6 +297,14 @@ function drawBackgroundWithSettings(ctx, img, width, height) {
     // Custom position percentages
     x = width * (timeline[0].backgroundPositionX / 100) - imgWidth / 2;
     y = height * (timeline[0].backgroundPositionY / 100) - imgHeight / 2;
+  }
+  
+  // Ensure image is drawn within bounds for original size
+  if (scale === '100%' && (x < 0 || y < 0 || x + imgWidth > width || y + imgHeight > height)) {
+    // If original size would place image partially outside canvas, 
+    // center it instead to make sure it's visible
+    x = Math.max(0, (width - imgWidth) / 2);
+    y = Math.max(0, (height - imgHeight) / 2);
   }
   
   // Draw the image

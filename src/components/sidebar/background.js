@@ -49,7 +49,14 @@ class BackgroundControls extends HTMLElement {
           <option value="cover" ${timeline[0].backgroundScale === 'cover' ? 'selected' : ''}>Cover (fill)</option>
           <option value="contain" ${timeline[0].backgroundScale === 'contain' ? 'selected' : ''}>Contain (fit)</option>
           <option value="100%" ${timeline[0].backgroundScale === '100%' ? 'selected' : ''}>Original size</option>
+          <option value="custom" ${timeline[0].backgroundScale === 'custom' ? 'selected' : ''}>Custom scale</option>
         </select>
+      </div>
+      
+      <!-- Custom scale slider (only visible when custom scale is selected) -->
+      <div class="form-group ${(this.backgroundImage && timeline[0].backgroundScale === 'custom') ? '' : 'hidden'}" id="customScaleContainer">
+        <label class="form-label">Custom Scale: <span id="scaleValue">${timeline[0].backgroundCustomScale || 50}%</span></label>
+        <input type="range" id="customScaleSlider" min="1" max="100" value="${timeline[0].backgroundCustomScale || 50}" class="w-full">
       </div>
       
       <!-- Image position options -->
@@ -100,6 +107,9 @@ class BackgroundControls extends HTMLElement {
     document.getElementById('removeImageBtn')?.addEventListener('click', this.removeBackgroundImage.bind(this));
     document.getElementById('bgImageScale')?.addEventListener('change', this.updateImageScaling.bind(this));
     document.getElementById('bgImagePosition')?.addEventListener('change', this.updateImagePosition.bind(this));
+    
+    // Add listener for custom scale slider
+    document.getElementById('customScaleSlider')?.addEventListener('input', this.updateCustomScale.bind(this));
   }
   
   removeBackgroundImage() {
@@ -117,6 +127,28 @@ class BackgroundControls extends HTMLElement {
   updateImageScaling() {
     const scaleMode = document.getElementById('bgImageScale').value;
     timeline[0].backgroundScale = scaleMode;
+    
+    // Show/hide custom scale slider based on selection
+    const customScaleContainer = document.getElementById('customScaleContainer');
+    if (scaleMode === 'custom') {
+      customScaleContainer.classList.remove('hidden');
+      // Initialize custom scale if not set
+      if (!timeline[0].backgroundCustomScale) {
+        timeline[0].backgroundCustomScale = 50;
+        document.getElementById('customScaleSlider').value = 50;
+        document.getElementById('scaleValue').textContent = '50%';
+      }
+    } else {
+      customScaleContainer.classList.add('hidden');
+    }
+    
+    this.applyBackgroundStyles();
+  }
+  
+  updateCustomScale(event) {
+    const scaleValue = event.target.value;
+    timeline[0].backgroundCustomScale = parseInt(scaleValue);
+    document.getElementById('scaleValue').textContent = `${scaleValue}%`;
     this.applyBackgroundStyles();
   }
   
@@ -137,8 +169,13 @@ class BackgroundControls extends HTMLElement {
     waveformContainer.style.backgroundImage = `url(${this.backgroundImage})`;
     waveformContainer.style.backgroundRepeat = 'no-repeat';
     
-    // Apply scaling
-    waveformContainer.style.backgroundSize = scaleMode;
+    // Apply scaling based on mode
+    if (scaleMode === 'custom') {
+      const scale = timeline[0].backgroundCustomScale || 50;
+      waveformContainer.style.backgroundSize = `${scale}%`;
+    } else {
+      waveformContainer.style.backgroundSize = scaleMode;
+    }
     
     // Apply positioning
     waveformContainer.style.backgroundPosition = positionMode;
@@ -170,6 +207,17 @@ class BackgroundControls extends HTMLElement {
       // Initialize timeline properties if not set
       if (!timeline[0].backgroundScale) timeline[0].backgroundScale = 'cover';
       if (!timeline[0].backgroundPosition) timeline[0].backgroundPosition = 'center';
+      if (!timeline[0].backgroundCustomScale) timeline[0].backgroundCustomScale = 50;
+      
+      // Update custom scale container visibility
+      const customScaleContainer = document.getElementById('customScaleContainer');
+      if (timeline[0].backgroundScale === 'custom') {
+        customScaleContainer.classList.remove('hidden');
+        document.getElementById('customScaleSlider').value = timeline[0].backgroundCustomScale;
+        document.getElementById('scaleValue').textContent = `${timeline[0].backgroundCustomScale}%`;
+      } else {
+        customScaleContainer.classList.add('hidden');
+      }
       
       // Apply all background styles
       this.applyBackgroundStyles();
