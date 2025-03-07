@@ -31,6 +31,12 @@ async function handleFileDrop(e) {
   const dropZone = document.querySelector('.drop-zone');
   dropZone.classList.remove('drag-over');
 
+  if (document.querySelector('wr-wavesurfer').audiofile !== null) {
+    console.log('Destroying WaveSurfer');
+    document.querySelector('wr-wavesurfer').wavesurfer.destroy();
+    document.querySelector('wr-wavesurfer').initWaveSurfer();
+  }
+
   const file = (e.target.files && e.target.files[0]) || e.dataTransfer.files[0];
   
   // Handle image files

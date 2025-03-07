@@ -75,7 +75,7 @@ class WaveSurferWrapper extends HTMLElement {
     });    
   }
 
-  loadFile(file) {
+  async loadFile(file) {
     // Set the audiofile property
     this.audiofile = file;
     
