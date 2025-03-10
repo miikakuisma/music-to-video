@@ -36,6 +36,7 @@ class WaveSurferWrapper extends HTMLElement {
   }
 
   initWaveSurfer() {
+
     const settings = {
       container: this.querySelector('#waveform'),
       waveColor: timeline[0].waveformColor,
@@ -50,7 +51,7 @@ class WaveSurferWrapper extends HTMLElement {
       responsive: true,
       normalize: false,
       partialRender: false,
-    };
+    }
 
     this.wavesurfer = WaveSurfer.create(settings);
 
@@ -66,7 +67,7 @@ class WaveSurferWrapper extends HTMLElement {
       document.querySelector('text-controls').renderText();
       document.querySelector('video-controls').updateVideo();
       // Set up play/pause button
-      document.querySelector('wr-preview-controls').createEventListeners();
+      document.querySelector('wr-preview-controls').createEventListeners()
       // Initialize property for tracking visibility
       this.waveformVisible = true;
     });
