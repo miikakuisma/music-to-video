@@ -10,12 +10,16 @@ class WaveSurferWrapper extends HTMLElement {
     this.zoom = 1;
     this.maxZoom = 3;
     this.minZoom = 0.5;
+    // Initialize IndexedDB connection
+    this.dbPromise = this.openDB();
   }
   
   connectedCallback() {
     this.render();
     document.addEventListener('DOMContentLoaded', () => {
       this.initWaveSurfer();
+      // When the app is loaded, check for a stored audio file in IndexedDB.
+      this.loadStoredAudio();
     });
   }
   
@@ -32,7 +36,6 @@ class WaveSurferWrapper extends HTMLElement {
   }
 
   initWaveSurfer() {
-
     const settings = {
       container: this.querySelector('#waveform'),
       waveColor: timeline[0].waveformColor,
@@ -47,7 +50,7 @@ class WaveSurferWrapper extends HTMLElement {
       responsive: true,
       normalize: false,
       partialRender: false,
-    }
+    };
 
     this.wavesurfer = WaveSurfer.create(settings);
 
@@ -63,7 +66,7 @@ class WaveSurferWrapper extends HTMLElement {
       document.querySelector('text-controls').renderText();
       document.querySelector('video-controls').updateVideo();
       // Set up play/pause button
-      document.querySelector('wr-preview-controls').createEventListeners()
+      document.querySelector('wr-preview-controls').createEventListeners();
       // Initialize property for tracking visibility
       this.waveformVisible = true;
     });
@@ -100,6 +103,9 @@ class WaveSurferWrapper extends HTMLElement {
           document.querySelector('button[play]').disabled = false;
 
           this.querySelector('.waveform-container').classList.add('file-loaded');
+          
+          // Store the audio file into IndexedDB
+          this.storeAudioFile(file).catch(err => console.error("Error storing audio file:", err));
           
           resolve();
         });
@@ -162,6 +168,77 @@ class WaveSurferWrapper extends HTMLElement {
       detail: { zoom: this.zoom }, 
       bubbles: true 
     }));
+  }
+  
+  // IndexedDB: Open database connection
+  openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('WaveSurferDB', 1);
+      request.onerror = function(event) {
+        console.error('IndexedDB error:', event);
+        reject(event);
+      };
+      request.onsuccess = function(event) {
+        resolve(event.target.result);
+      };
+      request.onupgradeneeded = function(event) {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains('audioFiles')) {
+          db.createObjectStore('audioFiles', { keyPath: 'id' });
+        }
+      };
+    });
+  }
+  
+  // IndexedDB: Store audio file
+  storeAudioFile(file) {
+    return this.dbPromise.then(db => {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('audioFiles', 'readwrite');
+        const store = tx.objectStore('audioFiles');
+        const data = { id: 'latest', file: file, timestamp: Date.now() };
+        const request = store.put(data);
+        request.onsuccess = function() {
+          resolve();
+        };
+        request.onerror = function(event) {
+          reject(event.target.error);
+        };
+      });
+    });
+  }
+  
+  // IndexedDB: Load stored audio file if available
+  async loadStoredAudio() {
+    try {
+      const db = await this.dbPromise;
+      const tx = db.transaction('audioFiles', 'readonly');
+      const store = tx.objectStore('audioFiles');
+      const request = store.get('latest');
+      request.onsuccess = (event) => {
+        const result = event.target.result;
+        if (result && result.file) {
+          this.audiofile = result.file;
+          const url = URL.createObjectURL(result.file);
+          this.wavesurfer.load(url);
+          this.wavesurfer.once('ready', () => {
+            document.querySelector('background-controls').updateBackground();
+            document.querySelector('waveform-controls').updateWaveform();
+            document.querySelector('text-controls').renderText();
+            document.querySelector('video-controls').updateVideo();
+            document.querySelector('wr-spinner').setAttribute('visible', 'false');
+            document.querySelector('.progress-text').innerText = '';
+            document.querySelector('button[play]').disabled = false;
+            this.querySelector('.waveform-container').classList.add('file-loaded');
+          });
+        }
+      };
+      request.onerror = (event) => {
+        console.error('Failed to load stored audio file:', event.target.error);
+      };
+    } catch (error) {
+      console.error('Error loading stored audio:', error);
+    }
   }
 }
 
