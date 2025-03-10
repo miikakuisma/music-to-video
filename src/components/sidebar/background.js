@@ -5,6 +5,7 @@ class BackgroundControls extends HTMLElement {
   }
   
   connectedCallback() {
+    this.backgroundImage = timeline[0].backgroundImage;
     this.render();
   }
   

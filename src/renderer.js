@@ -46,6 +46,7 @@ async function handleFileDrop(e) {
       const imageUrl = e.target.result;
       document.querySelector('background-controls').updateBackground(imageUrl);
       document.querySelector('background-controls').backgroundImage = imageUrl;
+      timeline[0].backgroundImage = imageUrl;
     };
     reader.readAsDataURL(file);
     return;

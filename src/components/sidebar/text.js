@@ -18,36 +18,34 @@ class TextControls extends HTMLElement {
   render() {
     this.innerHTML = `
       <div class="form-group">
-        <input type="text" id="songTitleInput" placeholder="Song Title" class="form-input">
+        <input type="text" id="songTitleInput" placeholder="Song Title" value="${timeline[0].text.songTitle}" class="form-input">
       </div>
     
       <div class="form-group">
-        <input type="text" id="artistNameInput" placeholder="Artist Name" class="form-input">
+        <input type="text" id="artistNameInput" placeholder="Artist Name" value="${timeline[0].text.artistName}" class="form-input">
       </div>
       
       <div class="flex gap-2 items-center">
         <select id="fontSelect" class="form-input flex-grow">
-          <option value="Arial">Arial</option>
-          <option value="Helvetica">Helvetica</option>
-          <option value="Times New Roman">Times New Roman</option>
+          <option value="Arial" ${timeline[0].text.font === 'Arial' ? 'selected' : ''}>Arial</option>
+          <option value="Helvetica" ${timeline[0].text.font === 'Helvetica' ? 'selected' : ''}>Helvetica</option>
+          <option value="Times New Roman" ${timeline[0].text.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
         </select>
-        <input type="number" id="fontSize" value="30" min="12" max="128" 
-          class="form-input w-20">
-          <input type="color" id="textColor" value="#ffffff" class="color-input">
-        </div>
+        <input type="number" id="fontSize" value="${timeline[0].text.fontSize}" min="12" max="128" class="form-input w-20">
+        <input type="color" id="textColor" value="${timeline[0].text.color}" class="color-input">
       </div>
 
       <div class="form-group mt-4">
         <select id="textAlign" class="form-input">
-          <option value="top-left">Top Left</option>
-          <option value="top-center" selected>Top Center</option>
-          <option value="top-right">Top Right</option>
-          <option value="center-left">Center Left</option>
-          <option value="center-center">Center Center</option>
-          <option value="center-right">Center Right</option>
-          <option value="bottom-left">Bottom Left</option>
-          <option value="bottom-center">Bottom Center</option>
-          <option value="bottom-right">Bottom Right</option>
+          <option value="top-left" ${timeline[0].text.align === 'top-left' ? 'selected' : ''}>Top Left</option>
+          <option value="top-center" ${timeline[0].text.align === 'top-center' ? 'selected' : ''}>Top Center</option>
+          <option value="top-right" ${timeline[0].text.align === 'top-right' ? 'selected' : ''}>Top Right</option>
+          <option value="center-left" ${timeline[0].text.align === 'center-left' ? 'selected' : ''}>Center Left</option>
+          <option value="center-center" ${timeline[0].text.align === 'center-center' ? 'selected' : ''}>Center Center</option>
+          <option value="center-right" ${timeline[0].text.align === 'center-right' ? 'selected' : ''}>Center Right</option>
+          <option value="bottom-left" ${timeline[0].text.align === 'bottom-left' ? 'selected' : ''}>Bottom Left</option>
+          <option value="bottom-center" ${timeline[0].text.align === 'bottom-center' ? 'selected' : ''}>Bottom Center</option>
+          <option value="bottom-right" ${timeline[0].text.align === 'bottom-right' ? 'selected' : ''}>Bottom Right</option>
         </select>
       </div>
 
@@ -55,26 +53,50 @@ class TextControls extends HTMLElement {
         <div class="form-group">
           <label class="form-label">X Offset</label>
           <div class="flex items-center">
-            <input type="range" id="textOffsetX" min="-100" max="100" value="0" class="form-range">
+            <input type="range" id="textOffsetX" min="-100" max="100" value="${timeline[0].text.offsetX}" class="form-range">
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Y Offset</label>
           <div class="flex items-center">
-            <input type="range" id="textOffsetY" min="-100" max="100" value="0" class="form-range">
+            <input type="range" id="textOffsetY" min="-100" max="100" value="${timeline[0].text.offsetY}" class="form-range">
           </div>
         </div>
       </div>
     `;
 
-    document.getElementById('songTitleInput').addEventListener('input', this.renderText);
-    document.getElementById('artistNameInput').addEventListener('input', this.renderText);
-    document.getElementById('fontSelect').addEventListener('change', this.renderText);
-    document.getElementById('textColor').addEventListener('input', this.renderText);
-    document.getElementById('fontSize').addEventListener('input', this.renderText);
-    document.getElementById('textAlign').addEventListener('change', this.renderText);
-    document.getElementById('textOffsetX').addEventListener('input', this.renderText);
-    document.getElementById('textOffsetY').addEventListener('input', this.renderText);
+    document.getElementById('songTitleInput').addEventListener('input', (e) => {
+      timeline[0].text.songTitle = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('artistNameInput').addEventListener('input', (e) => {
+      timeline[0].text.artistName = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('fontSelect').addEventListener('change', (e) => {
+      timeline[0].text.font = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('textColor').addEventListener('input', (e) => {
+      timeline[0].text.color = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('fontSize').addEventListener('input', (e) => {
+      timeline[0].text.fontSize = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('textAlign').addEventListener('change', (e) => {
+      timeline[0].text.align = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('textOffsetX').addEventListener('input', (e) => {
+      timeline[0].text.offsetX = e.target.value;
+      this.renderText();
+    });
+    document.getElementById('textOffsetY').addEventListener('input', (e) => {
+      timeline[0].text.offsetY = e.target.value;
+      this.renderText();
+    });
   }
 
   initTextCanvas() {
@@ -103,21 +125,8 @@ class TextControls extends HTMLElement {
     // Clear the canvas
     textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
     
-    // Get text properties from input fields
-    const songTitle = document.getElementById('songTitleInput').value;
-    const artistName = document.getElementById('artistNameInput').value;
-    const font = document.getElementById('fontSelect').value;
-    const color = document.getElementById('textColor').value;
-    const size = document.getElementById('fontSize').value;
-    const align = document.getElementById('textAlign').value;
-
-    // update timeline model from input fields
-    timeline[0].text.songTitle = songTitle;
-    timeline[0].text.artistName = artistName;
-    timeline[0].text.font = font;
-    timeline[0].text.color = color;
-    timeline[0].text.size = size;
-    timeline[0].text.align = align;
+    // Read text properties from timeline data
+    const { songTitle, artistName, font, color, fontSize, align, offsetX, offsetY } = timeline[0].text;
     
     // Set styling
     textCtx.fillStyle = color;
@@ -142,16 +151,16 @@ class TextControls extends HTMLElement {
     }
 
     // Apply offsets
-    x += parseInt(document.getElementById('textOffsetX').value);
-    y += parseInt(document.getElementById('textOffsetY').value);
+    x += parseInt(offsetX, 10);
+    y += parseInt(offsetY, 10);
     
     // Render song title
-    textCtx.font = `bold ${size}px ${font}`;
+    textCtx.font = `bold ${fontSize}px ${font}`;
     textCtx.fillText(songTitle, x, y);
     
     // Render artist name below title
-    textCtx.font = `${size * 0.6}px ${font}`;
-    textCtx.fillText(artistName, x, y + size * 1.2);
+    textCtx.font = `${fontSize * 0.6}px ${font}`;
+    textCtx.fillText(artistName, x, y + fontSize * 1.2);
   }
 }
 
