@@ -7,8 +7,8 @@ class VideoControls extends HTMLElement {
       '480p': { width: 960, height: 480 },
       '360p': { width: 640, height: 360 }
     };
-    this.currentSize = '360p';
-    this.currentOrientation = 'landscape';
+    this.currentSize = localStorage.getItem('videoSize') || '360p';
+    this.currentOrientation = localStorage.getItem('videoOrientation') || 'landscape';
   }
   
   connectedCallback() {
@@ -47,11 +47,13 @@ class VideoControls extends HTMLElement {
     document.getElementById('sizeMenu').addEventListener('change', (e) => {
       this.currentSize = e.target.value;
       this.updateDimensions();
+      localStorage.setItem('videoSize', this.currentSize);
     });
 
     document.getElementById('orientationMenu').addEventListener('change', (e) => {
       this.currentOrientation = e.target.value;
       this.updateDimensions();
+      localStorage.setItem('videoOrientation', this.currentOrientation);
     });
   }
   

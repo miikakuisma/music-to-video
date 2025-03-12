@@ -150,10 +150,6 @@ class WaveformControls extends HTMLElement {
     timeline[0].barAlign = barAlign;
 
     try {
-      // Get current dimensions and orientation from video controls
-      const { width, height } = videoControls.calculateDimensions();
-      const isPortrait = videoControls.currentOrientation === 'portrait';
-      
       wavesurfer.setOptions({
         waveColor: waveformColor,
         progressColor: progressColor,
@@ -162,7 +158,6 @@ class WaveformControls extends HTMLElement {
         cursorWidth: cursorWidth,
         barAlign: barAlign
       });
-      
       // Let video controls handle dimension changes to keep them consistent
       videoControls.updateWaveform();
     } catch (error) {
