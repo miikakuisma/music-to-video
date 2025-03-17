@@ -70,6 +70,14 @@ class WaveSurferWrapper extends HTMLElement {
       document.querySelector('wr-preview-controls').createEventListeners()
       // Initialize property for tracking visibility
       this.waveformVisible = true;
+      
+      // Make sure the render button is enabled
+      document.getElementById('renderBtn').disabled = false;
+      
+      // Dispatch audio-loaded event
+      document.dispatchEvent(new CustomEvent('audio-loaded', {
+        detail: { audioElement: this.wavesurfer.media }
+      }));
     });
 
     // Add error handling for WaveSurfer initialization
@@ -107,6 +115,14 @@ class WaveSurferWrapper extends HTMLElement {
           
           // Store the audio file into IndexedDB
           this.storeAudioFile(file).catch(err => console.error("Error storing audio file:", err));
+          
+          // Make sure the render button is enabled
+          document.getElementById('renderBtn').disabled = false;
+          
+          // Dispatch audio-loaded event
+          document.dispatchEvent(new CustomEvent('audio-loaded', {
+            detail: { audioElement: this.wavesurfer.media }
+          }));
           
           resolve();
         });
@@ -231,6 +247,14 @@ class WaveSurferWrapper extends HTMLElement {
             document.querySelector('.progress-text').innerText = '';
             document.querySelector('button[play]').disabled = false;
             this.querySelector('.waveform-container').classList.add('file-loaded');
+            
+            // Make sure the render button is enabled
+            document.getElementById('renderBtn').disabled = false;
+            
+            // Dispatch audio-loaded event
+            document.dispatchEvent(new CustomEvent('audio-loaded', {
+              detail: { audioElement: this.wavesurfer.media }
+            }));
           });
         }
       };

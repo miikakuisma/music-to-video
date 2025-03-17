@@ -562,3 +562,55 @@ async function processAudioMetadata(file, filePath) {
     }
   }
 }
+
+// Step 1: First load audio file if available
+console.log('Attempting to load audio file from previous session...');
+const audioFile = await audioStorage.getAudioFile();
+
+if (audioFile) {
+  console.log('Restoring audio file from previous session:', audioFile.name);
+  // Load audio file but don't process metadata yet
+  await loadAudioFileWithoutMetadata(audioFile);
+  
+  // Enable the export button when audio is restored
+  document.getElementById('renderBtn').disabled = false;
+}
+
+async function loadAudioFileWithoutMetadata(file) {
+  try {
+    document.querySelector('wr-wavesurfer').audiofile = file;
+    // Explicitly enable the render button
+    document.getElementById('renderBtn').disabled = false;
+
+    document.querySelector('wr-spinner').setAttribute('visible', 'true');
+    document.querySelector('.progress-text').innerText = 'Loading audio..';
+
+    await document.querySelector('wr-wavesurfer').loadFile(file);
+    
+    // Don't process metadata yet, just hide spinner
+    document.querySelector('wr-spinner').setAttribute('visible', 'false');
+    document.querySelector('.progress-text').innerText = '';
+    document.querySelector('button[play]').disabled = false;
+    
+    // Save audio file to IndexedDB
+    import('./components/audio-storage.js').then(module => {
+      const audioStorage = module.default;
+      audioStorage.saveAudioFile(file).catch(error => {
+        console.error('Error saving audio file to IndexedDB:', error);
+      });
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error loading audio file:', error);
+    document.querySelector('wr-spinner').setAttribute('visible', 'false');
+    document.querySelector('.progress-text').innerText = '';
+    return false;
+  }
+}
+
+// Final check to ensure render button is enabled if audio is loaded
+if (document.querySelector('wr-wavesurfer').audiofile) {
+  document.getElementById('renderBtn').disabled = false;
+  document.querySelector('button[play]').disabled = false;
+}
