@@ -579,6 +579,7 @@ import('./components/audio-storage.js').then(module => {
     loadAudioFileWithoutMetadata(audioFile).then(() => {
       // Enable the export button when audio is restored
       document.getElementById('renderBtn').disabled = false;
+      document.querySelector('button[play]').disabled = false;
     });
   }
 }).catch(error => {
@@ -591,12 +592,14 @@ if (audioFile) {
   loadAudioFileWithoutMetadata(audioFile).then(() => {
     // Enable the export button when audio is restored
     document.getElementById('renderBtn').disabled = false;
+    document.querySelector('button[play]').disabled = false;
   }).catch(error => {
     console.error('Error loading audio file:', error);
   });
   
   // Enable the export button when audio is restored
   document.getElementById('renderBtn').disabled = false;
+  document.querySelector('button[play]').disabled = false;
 }
 
 async function loadAudioFileWithoutMetadata(file) {

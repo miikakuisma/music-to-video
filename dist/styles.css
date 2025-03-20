@@ -716,10 +716,6 @@ video {
   height: 16px;
 }
 
-.h-\[calc\(100\%-48px\)\] {
-  height: calc(100% - 48px);
-}
-
 .h-full {
   height: 100%;
 }
@@ -831,10 +827,6 @@ video {
   align-items: center;
 }
 
-.justify-start {
-  justify-content: flex-start;
-}
-
 .justify-center {
   justify-content: center;
 }
@@ -944,10 +936,6 @@ video {
 .object-contain {
   -o-object-fit: contain;
      object-fit: contain;
-}
-
-.p-0 {
-  padding: 0px;
 }
 
 .p-1 {
