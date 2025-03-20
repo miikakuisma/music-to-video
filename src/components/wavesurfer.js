@@ -10,15 +10,13 @@ class WaveSurferWrapper extends HTMLElement {
     this.zoom = 1;
     this.maxZoom = 3;
     this.minZoom = 0.5;
-    // Initialize IndexedDB connection
-    this.dbPromise = this.openDB();
   }
   
   connectedCallback() {
     this.render();
     document.addEventListener('DOMContentLoaded', () => {
       this.initWaveSurfer();
-      // When the app is loaded, check for a stored audio file in IndexedDB.
+      // When the app is loaded, check for a stored audio file
       this.loadStoredAudio();
     });
   }
@@ -36,6 +34,10 @@ class WaveSurferWrapper extends HTMLElement {
   }
 
   initWaveSurfer() {
+    // Ensure barHeight is properly set
+    if (!timeline[0].barHeight && timeline[0].barHeight !== 0) {
+      timeline[0].barHeight = 0.5;
+    }
 
     const settings = {
       container: this.querySelector('#waveform'),
@@ -113,8 +115,13 @@ class WaveSurferWrapper extends HTMLElement {
 
           this.querySelector('.waveform-container').classList.add('file-loaded');
           
-          // Store the audio file into IndexedDB
-          this.storeAudioFile(file).catch(err => console.error("Error storing audio file:", err));
+          // Store the audio file into IndexedDB using the new module
+          import('./audio-storage.js').then(module => {
+            const audioStorage = module.default;
+            audioStorage.saveAudioFile(file).catch(err => {
+              console.error("Error storing audio file:", err);
+            });
+          });
           
           // Make sure the render button is enabled
           document.getElementById('renderBtn').disabled = false;
@@ -132,142 +139,65 @@ class WaveSurferWrapper extends HTMLElement {
     });
   }
 
-  zoomIn() {
-    this.zoom = Math.min(this.maxZoom, this.zoom + 0.25);
-    this.applyZoom();
-    return this.zoom;
-  }
-  
-  zoomOut() {
-    this.zoom = Math.max(this.minZoom, this.zoom - 0.25);
-    this.applyZoom();
-    return this.zoom;
-  }
-  
-  resetZoom() {
-    this.zoom = 1;
-    this.applyZoom();
-    return this.zoom;
-  }
-
-  zoomToFit() {
-    const previewElement = document.querySelector('.preview');
-    if (previewElement) {
-      const previewWidth = previewElement.clientWidth;
-      const previewHeight = previewElement.clientHeight;
-      let effectiveWidth = this.width;
-      let effectiveHeight = this.height;
-      
-      // Support vertical (portrait) videos:
-      // If the video is vertical but the preview area is horizontal,
-      // swap the dimensions so that the rotated video fits better.
-      if (this.height > this.width && previewWidth > previewHeight) {
-        effectiveWidth = this.height;
-        effectiveHeight = this.width;
-      }
-      
-      if (effectiveWidth > previewWidth || effectiveHeight > previewHeight) {
-        const zoomFactor = Math.min(previewWidth / effectiveWidth, previewHeight / effectiveHeight);
-        this.zoom = zoomFactor;
-      } else {
-        this.zoom = 1;
-      }
-      this.applyZoom();
-    }
-  }
-  
-  applyZoom() {
-    const container = this.querySelector('.waveform-container');
-    container.style.zoom = this.zoom;
-    
-    // Dispatch an event so other components can react to zoom changes
-    this.dispatchEvent(new CustomEvent('zoom-changed', { 
-      detail: { zoom: this.zoom }, 
-      bubbles: true 
-    }));
-  }
-  
-  // IndexedDB: Open database connection
-  openDB() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('WaveSurferDB', 1);
-      request.onerror = function(event) {
-        console.error('IndexedDB error:', event);
-        reject(event);
-      };
-      request.onsuccess = function(event) {
-        resolve(event.target.result);
-      };
-      request.onupgradeneeded = function(event) {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains('audioFiles')) {
-          db.createObjectStore('audioFiles', { keyPath: 'id' });
-        }
-      };
-    });
-  }
-  
-  // IndexedDB: Store audio file
-  storeAudioFile(file) {
-    return this.dbPromise.then(db => {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction('audioFiles', 'readwrite');
-        const store = tx.objectStore('audioFiles');
-        const data = { id: 'latest', file: file, timestamp: Date.now() };
-        const request = store.put(data);
-        request.onsuccess = function() {
-          resolve();
-        };
-        request.onerror = function(event) {
-          reject(event.target.error);
-        };
-      });
-    });
-  }
-  
-  // IndexedDB: Load stored audio file if available
+  // Load stored audio file from IndexedDB
   async loadStoredAudio() {
     try {
-      const db = await this.dbPromise;
-      const tx = db.transaction('audioFiles', 'readonly');
-      const store = tx.objectStore('audioFiles');
-      const request = store.get('latest');
-      request.onsuccess = (event) => {
-        const result = event.target.result;
-        if (result && result.file) {
-          this.audiofile = result.file;
-          const url = URL.createObjectURL(result.file);
-          this.wavesurfer.load(url);
-          this.wavesurfer.once('ready', () => {
-            document.querySelector('background-controls').updateBackground();
-            document.querySelector('waveform-controls').updateWaveform();
-            document.querySelector('text-controls').renderText();
-            document.querySelector('video-controls').updateVideo();
-            document.querySelector('wr-spinner').setAttribute('visible', 'false');
-            document.querySelector('.progress-text').innerText = '';
-            document.querySelector('button[play]').disabled = false;
-            this.querySelector('.waveform-container').classList.add('file-loaded');
-            
-            // Make sure the render button is enabled
-            document.getElementById('renderBtn').disabled = false;
-            
-            // Dispatch audio-loaded event
-            document.dispatchEvent(new CustomEvent('audio-loaded', {
-              detail: { audioElement: this.wavesurfer.media }
-            }));
-          });
-        }
-      };
-      request.onerror = (event) => {
-        console.error('Failed to load stored audio file:', event.target.error);
-      };
+      const { default: audioStorage } = await import('./audio-storage.js');
+      const file = await audioStorage.getAudioFile();
+      
+      if (file) {
+        this.audiofile = file;
+        const url = URL.createObjectURL(file);
+        this.wavesurfer.load(url);
+        
+        this.wavesurfer.once('ready', () => {
+          document.querySelector('background-controls').updateBackground();
+          document.querySelector('waveform-controls').updateWaveform();
+          document.querySelector('text-controls').renderText();
+          document.querySelector('video-controls').updateVideo();
+          document.querySelector('wr-spinner').setAttribute('visible', 'false');
+          document.querySelector('.progress-text').innerText = '';
+          document.querySelector('button[play]').disabled = false;
+          this.querySelector('.waveform-container').classList.add('file-loaded');
+          
+          // Make sure the render button is enabled
+          document.getElementById('renderBtn').disabled = false;
+          
+          // Dispatch audio-loaded event
+          document.dispatchEvent(new CustomEvent('audio-loaded', {
+            detail: { audioElement: this.wavesurfer.media }
+          }));
+        });
+      }
     } catch (error) {
       console.error('Error loading stored audio:', error);
     }
   }
+
+  // Zoom methods
+  zoomIn() {
+    if (this.zoom < this.maxZoom) {
+      this.zoom = Math.min(this.maxZoom, this.zoom + 0.1);
+      this.updateZoom();
+    }
+  }
+
+  zoomOut() {
+    if (this.zoom > this.minZoom) {
+      this.zoom = Math.max(this.minZoom, this.zoom - 0.1);
+      this.updateZoom();
+    }
+  }
+
+  zoomToFit() {
+    this.zoom = 1;
+    this.updateZoom();
+  }
+
+  updateZoom() {
+    this.querySelector('.waveform-container').style.zoom = this.zoom;
+  }
 }
 
-// Define the custom element if not already defined
-if (!customElements.get('wr-wavesurfer')) {
-  customElements.define('wr-wavesurfer', WaveSurferWrapper);
-}
+// Define the custom element
+customElements.define('wr-wavesurfer', WaveSurferWrapper);

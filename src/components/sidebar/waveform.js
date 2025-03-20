@@ -27,12 +27,12 @@ class WaveformControls extends HTMLElement {
       <div class="form-group">
         <label class="form-label">Height</label>
         <select id="waveHeight" class="form-input">
-          <option value="1">100%</option>
-          <option value="0.75">75%</option>
-          <option value="0.5">50%</option>
-          <option value="0.333">33%</option>
-          <option value="0.25">25%</option>
-          <option value="0.20">20%</option>
+          <option value="1" ${Math.abs(timeline[0].barHeight - 1) < 0.001 ? 'selected' : ''}>100%</option>
+          <option value="0.75" ${Math.abs(timeline[0].barHeight - 0.75) < 0.001 ? 'selected' : ''}>75%</option>
+          <option value="0.5" ${Math.abs(timeline[0].barHeight - 0.5) < 0.001 ? 'selected' : ''}>50%</option>
+          <option value="0.333" ${Math.abs(timeline[0].barHeight - 0.333) < 0.001 ? 'selected' : ''}>33%</option>
+          <option value="0.25" ${Math.abs(timeline[0].barHeight - 0.25) < 0.001 ? 'selected' : ''}>25%</option>
+          <option value="0.20" ${Math.abs(timeline[0].barHeight - 0.20) < 0.001 ? 'selected' : ''}>20%</option>
         </select>
       </div>
 
@@ -88,15 +88,13 @@ class WaveformControls extends HTMLElement {
 
     document.getElementById('audioFile').addEventListener('change', handleFileDrop);
 
-    document.getElementById('waveHeight').value = timeline[0].barHeight;
-
     document.getElementById('waveHeight').addEventListener('change', () => {
-      const heightDivider = document.getElementById('waveHeight').value;
+      const heightValue = parseFloat(document.getElementById('waveHeight').value);
       try {
         const wavesurfer = document.querySelector('wr-wavesurfer').wavesurfer;
-        timeline[0].barHeight = parseFloat(heightDivider);
+        timeline[0].barHeight = heightValue;
         wavesurfer.setOptions({
-          barHeight: parseFloat(heightDivider)
+          barHeight: heightValue
         });
       } catch (error) {
         console.error('Error setting waveform options:', error);

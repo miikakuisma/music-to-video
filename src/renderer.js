@@ -565,12 +565,35 @@ async function processAudioMetadata(file, filePath) {
 
 // Step 1: First load audio file if available
 console.log('Attempting to load audio file from previous session...');
-const audioFile = await audioStorage.getAudioFile();
+// Use promise-based approach instead of await at the top level
+let audioFile = null;
+import('./components/audio-storage.js').then(module => {
+  const audioStorage = module.default;
+  return audioStorage.getAudioFile();
+}).then(file => {
+  audioFile = file;
+  document.querySelector('wr-wavesurfer').audiofile = file;
+  if (audioFile) {
+    console.log('Restoring audio file from previous session:', audioFile.name);
+    // Load audio file but don't process metadata yet
+    loadAudioFileWithoutMetadata(audioFile).then(() => {
+      // Enable the export button when audio is restored
+      document.getElementById('renderBtn').disabled = false;
+    });
+  }
+}).catch(error => {
+  console.error('Error loading audio file from storage:', error);
+});
 
 if (audioFile) {
   console.log('Restoring audio file from previous session:', audioFile.name);
   // Load audio file but don't process metadata yet
-  await loadAudioFileWithoutMetadata(audioFile);
+  loadAudioFileWithoutMetadata(audioFile).then(() => {
+    // Enable the export button when audio is restored
+    document.getElementById('renderBtn').disabled = false;
+  }).catch(error => {
+    console.error('Error loading audio file:', error);
+  });
   
   // Enable the export button when audio is restored
   document.getElementById('renderBtn').disabled = false;
@@ -610,7 +633,7 @@ async function loadAudioFileWithoutMetadata(file) {
 }
 
 // Final check to ensure render button is enabled if audio is loaded
-if (document.querySelector('wr-wavesurfer').audiofile) {
+if (document.querySelector('wr-wavesurfer') && document.querySelector('wr-wavesurfer').audiofile) {
   document.getElementById('renderBtn').disabled = false;
   document.querySelector('button[play]').disabled = false;
 }
