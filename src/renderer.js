@@ -369,9 +369,40 @@ async function generateVideo() {
     const frameCount = Math.min(videoWidth, 1920);
     const fps = Math.min(30, frameCount / duration);
     
+    // Get the audio file
+    const audioFile = document.querySelector('wr-wavesurfer').audiofile;
+    
+    // Check if we have a file path or need to save the file first
+    let audioPath = audioFile.path;
+    
+    // If the file doesn't have a path (e.g., it was loaded from IndexedDB)
+    // we need to save it to a temporary file
+    if (!audioPath) {
+      progressText.textContent = 'Creating temporary audio file...';
+      console.log('Audio file has no path, creating temporary file');
+      
+      // Create a temporary file
+      const tempDir = await require('electron').ipcRenderer.invoke('get-temp-dir');
+      const tempAudioPath = path.join(tempDir, `temp_audio_${Date.now()}.${audioFile.name.split('.').pop() || 'mp3'}`);
+      
+      // Convert to ArrayBuffer, then Buffer, then write to file
+      const arrayBuffer = await audioFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      // Use IPC to write the file via main process to avoid renderer process file access limitations
+      await require('electron').ipcRenderer.invoke('write-temp-audio-file', {
+        filePath: tempAudioPath,
+        fileData: Array.from(buffer) // Convert to array for IPC transfer
+      });
+      
+      // Now we have a valid path
+      audioPath = tempAudioPath;
+      console.log('Created temporary audio file at:', audioPath);
+    }
+    
     // Start batch rendering
     const batchResult = await require('electron').ipcRenderer.invoke('start-batch-render', {
-      audioPath: document.querySelector('wr-wavesurfer').audiofile.path,
+      audioPath: audioPath,
       fps,
       frameCount
     });
@@ -565,18 +596,15 @@ async function processAudioMetadata(file, filePath) {
 
 // Step 1: First load audio file if available
 console.log('Attempting to load audio file from previous session...');
-// Use promise-based approach instead of await at the top level
-let audioFile = null;
+// Use promise-based approach to load audio
 import('./components/audio-storage.js').then(module => {
   const audioStorage = module.default;
   return audioStorage.getAudioFile();
 }).then(file => {
-  audioFile = file;
-  document.querySelector('wr-wavesurfer').audiofile = file;
-  if (audioFile) {
-    console.log('Restoring audio file from previous session:', audioFile.name);
+  if (file) {
+    console.log('Restoring audio file from previous session:', file.name);
     // Load audio file but don't process metadata yet
-    loadAudioFileWithoutMetadata(audioFile).then(() => {
+    loadAudioFileWithoutMetadata(file).then(() => {
       // Enable the export button when audio is restored
       document.getElementById('renderBtn').disabled = false;
       document.querySelector('button[play]').disabled = false;
@@ -585,22 +613,6 @@ import('./components/audio-storage.js').then(module => {
 }).catch(error => {
   console.error('Error loading audio file from storage:', error);
 });
-
-if (audioFile) {
-  console.log('Restoring audio file from previous session:', audioFile.name);
-  // Load audio file but don't process metadata yet
-  loadAudioFileWithoutMetadata(audioFile).then(() => {
-    // Enable the export button when audio is restored
-    document.getElementById('renderBtn').disabled = false;
-    document.querySelector('button[play]').disabled = false;
-  }).catch(error => {
-    console.error('Error loading audio file:', error);
-  });
-  
-  // Enable the export button when audio is restored
-  document.getElementById('renderBtn').disabled = false;
-  document.querySelector('button[play]').disabled = false;
-}
 
 async function loadAudioFileWithoutMetadata(file) {
   try {
@@ -617,6 +629,13 @@ async function loadAudioFileWithoutMetadata(file) {
     document.querySelector('wr-spinner').setAttribute('visible', 'false');
     document.querySelector('.progress-text').innerText = '';
     document.querySelector('button[play]').disabled = false;
+    
+    // Explicitly recreate event listeners for preview controls
+    console.log('Ensuring preview controls event listeners are attached');
+    const previewControls = document.querySelector('wr-preview-controls');
+    if (previewControls) {
+      previewControls.createEventListeners();
+    }
     
     // Save audio file to IndexedDB
     import('./components/audio-storage.js').then(module => {

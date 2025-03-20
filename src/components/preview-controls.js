@@ -11,15 +11,20 @@ class PreviewControls extends HTMLElement {
     const wavesurferComponent = document.querySelector('wr-wavesurfer');
     const wavesurfer = wavesurferComponent.wavesurfer;
 
-    // Set up play/pause button
-    this.querySelector('button[play]').addEventListener('click', () => {
+    // Clear any existing listeners on the play button to prevent duplicates
+    const playButton = this.querySelector('button[play]');
+    const newPlayButton = playButton.cloneNode(true);
+    playButton.parentNode.replaceChild(newPlayButton, playButton);
+
+    // Set up play/pause button with fresh listeners
+    newPlayButton.addEventListener('click', () => {
       wavesurfer.playPause();
       if (wavesurfer.isPlaying()) {
         // pause icon
-        this.querySelector('button[play]').innerHTML = '<svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect height="320" width="79" x="128" y="96"/><rect height="320" width="79" x="305" y="96"/></g></svg>';
+        newPlayButton.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect height="320" width="79" x="128" y="96"/><rect height="320" width="79" x="305" y="96"/></g></svg>';
       } else {
         // play icon
-        this.querySelector('button[play]').innerHTML = '<svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M128,96v320l256-160L128,96L128,96z"/></svg>';
+        newPlayButton.innerHTML = '<svg width="24px" height="24px" viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M128,96v320l256-160L128,96L128,96z"/></svg>';
       }
     });
 
@@ -49,12 +54,19 @@ class PreviewControls extends HTMLElement {
     const progressHandle = this.querySelector('.progress-handle');
     const progressBarFill = this.querySelector('.progress-bar-fill');
     
-    // Handler for progress bar clicks
-    progressBar.addEventListener('click', (e) => {
+    // Clear existing listeners from progress elements
+    const newProgressBar = progressBar.cloneNode(true);
+    progressBar.parentNode.replaceChild(newProgressBar, progressBar);
+
+    const newProgressHandle = progressHandle.cloneNode(true);
+    progressHandle.parentNode.replaceChild(newProgressHandle, progressHandle);
+    
+    // Re-attach event listeners for progress bar clicks
+    newProgressBar.addEventListener('click', (e) => {
       // If waveform is hidden, use the progress bar itself for calculations
       let rect;
-      if (!wavesurferComponent.waveformVisible && progressBar) {
-        rect = progressBar.getBoundingClientRect();
+      if (!wavesurferComponent.waveformVisible && newProgressBar) {
+        rect = newProgressBar.getBoundingClientRect();
       } else {
         rect = wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
       }
@@ -65,7 +77,7 @@ class PreviewControls extends HTMLElement {
       
       // Update UI elements
       progressBarFill.style.width = `${newPosition * 100}%`;
-      progressHandle.style.left = `${newPosition * 100}%`;
+      newProgressHandle.style.left = `${newPosition * 100}%`;
       
       // Update time
       if (wavesurfer && wavesurfer.getDuration()) {
@@ -75,14 +87,14 @@ class PreviewControls extends HTMLElement {
     });
     
     // Handler for drag operations on progress handle
-    progressHandle.addEventListener('mousedown', (e) => {
+    newProgressHandle.addEventListener('mousedown', (e) => {
       e.preventDefault();
       
       const handleMouseMove = (e) => {
         // Use progress bar for position calculation when waveform is hidden
         let rect;
-        if (!wavesurferComponent.waveformVisible && progressBar) {
-          rect = progressBar.getBoundingClientRect();
+        if (!wavesurferComponent.waveformVisible && newProgressBar) {
+          rect = newProgressBar.getBoundingClientRect();
         } else {
           rect = wavesurfer.renderer.canvasWrapper.getBoundingClientRect();
         }
@@ -93,7 +105,7 @@ class PreviewControls extends HTMLElement {
         
         // Update UI
         progressBarFill.style.width = `${newPosition * 100}%`;
-        progressHandle.style.left = `${newPosition * 100}%`;
+        newProgressHandle.style.left = `${newPosition * 100}%`;
         
         // Update audio if available
         if (wavesurfer && wavesurfer.getDuration()) {
@@ -111,17 +123,29 @@ class PreviewControls extends HTMLElement {
       document.addEventListener('mouseup', handleMouseUp);
     });
     
+    // Clear existing timeupdate listeners
+    if (this._timeUpdateHandler) {
+      wavesurfer.un('timeupdate', this._timeUpdateHandler);
+    }
+    
     // Add timeupdate event listener to keep UI elements in sync
-    wavesurfer.on('timeupdate', (seconds) => {
+    this._timeUpdateHandler = (seconds) => {
       const progress = (seconds / wavesurfer.getDuration()) * 100;
       progressBarFill.style.width = `${progress}%`;
-      progressHandle.style.left = `${progress}%`;
+      newProgressHandle.style.left = `${progress}%`;
       
       // Update time display
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = Math.floor(seconds % 60);
       this.querySelector('.time-display').textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    });
+    };
+    
+    wavesurfer.on('timeupdate', this._timeUpdateHandler);
+    
+    // Enable play button explicitly
+    newPlayButton.disabled = false;
+    
+    console.log('Preview controls event listeners attached successfully');
   }
 
   render() {

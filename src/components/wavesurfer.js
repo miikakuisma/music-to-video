@@ -155,6 +155,14 @@ class WaveSurferWrapper extends HTMLElement {
           document.querySelector('waveform-controls').updateWaveform();
           document.querySelector('text-controls').renderText();
           document.querySelector('video-controls').updateVideo();
+          
+          // Explicitly recreate event listeners for the play button
+          const previewControls = document.querySelector('wr-preview-controls');
+          if (previewControls) {
+            console.log('Reattaching preview controls event listeners');
+            previewControls.createEventListeners();
+          }
+          
           document.querySelector('wr-spinner').setAttribute('visible', 'false');
           document.querySelector('.progress-text').innerText = '';
           document.querySelector('button[play]').disabled = false;

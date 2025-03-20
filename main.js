@@ -179,6 +179,39 @@ ipcMain.handle('write-frame-batch', async (event, { frames }) => {
   }
 });
 
+// Add handler for getting a temporary directory
+ipcMain.handle('get-temp-dir', async (event) => {
+  try {
+    const tempDir = path.join(app.getPath('temp'), `wave_render_${Date.now()}`);
+    
+    // Create temp directory if it doesn't exist
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    
+    return tempDir;
+  } catch (error) {
+    console.error('Error getting temp directory:', error);
+    throw error;
+  }
+});
+
+// Add handler for writing a temporary audio file
+ipcMain.handle('write-temp-audio-file', async (event, { filePath, fileData }) => {
+  try {
+    // Convert array back to Buffer
+    const buffer = Buffer.from(fileData);
+    
+    // Write file
+    fs.writeFileSync(filePath, buffer);
+    
+    return { success: true, filePath };
+  } catch (error) {
+    console.error('Error writing temporary audio file:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // Process all batches and generate the final video
 ipcMain.handle('process-video', async (event, args) => {
   try {
@@ -191,12 +224,26 @@ ipcMain.handle('process-video', async (event, args) => {
       throw new Error(`FFmpeg binary not found at: ${ffmpegPath}`);
     }
     
+    // Double check the ffmpeg executable is usable by trying to get its version
+    try {
+      const { stdout, stderr } = require('child_process').spawnSync(ffmpegPath, ['-version']);
+      console.log('FFmpeg version:', stdout.toString().split('\n')[0]);
+    } catch (error) {
+      console.error('FFmpeg executable test failed:', error);
+      throw new Error(`FFmpeg executable test failed: ${error.message}`);
+    }
+    
     if (!global.renderState) {
       return { success: false, error: 'Render not initialized' };
     }
     
     const { tempDir, frameCount, fps, audioPath, outputPath } = global.renderState;
     global.renderState.status = 'encoding';
+    
+    // Check that audio file exists
+    if (!fs.existsSync(audioPath)) {
+      throw new Error(`Audio file not found at: ${audioPath}`);
+    }
     
     // Process video with ffmpeg
     await new Promise((resolve, reject) => {
@@ -217,13 +264,18 @@ ipcMain.handle('process-video', async (event, args) => {
         .on('progress', (progress) => {
           console.log('FFmpeg Progress:', progress);
         })
+        .on('start', (commandLine) => {
+          console.log('FFmpeg Command:', commandLine);
+        })
         .on('end', () => {
           global.renderState.status = 'complete';
           resolve();
         })
-        .on('error', (err) => {
+        .on('error', (err, stdout, stderr) => {
           global.renderState.status = 'error';
-          reject(new Error(`FFmpeg error: ${err.message}`));
+          console.error('FFmpeg error:', err.message);
+          console.error('FFmpeg stderr:', stderr);
+          reject(new Error(`FFmpeg error: ${err.message}\n${stderr}`));
         })
         .run();
     });
@@ -254,7 +306,7 @@ ipcMain.handle('process-video', async (event, args) => {
     return result;
   } catch (error) {
     console.error('Error processing video:', error);
-    throw error;
+    return { success: false, error: error.message };
   }
 });
 
